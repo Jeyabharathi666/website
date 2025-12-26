@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Google Sheet Data</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #888; padding: 8px; text-align: left; }
+    th { background: #f2f2f2; }
+  </style>
+</head>
+<body>
+
+<h2>Sheet Data (Columns B, C, X, Y)</h2>
+
+<table id="dataTable">
+  <thead>
+    <tr>
+      <th>B</th>
+      <th>C</th>
+      <th>X</th>
+      <th>Y</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<script>
+const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
+
+fetch(csvUrl)
+  .then(response => response.text())
+  .then(csvData => {
+    const rows = csvData.split("\n");
+    const tbody = document.querySelector("#dataTable tbody");
+
+    rows.forEach((row, index) => {
+      if (row.trim() === "") return; // skip empty lines
+
+      const cols = row.split(",");
+
+      // We want:
+      // B = index 1
+      // C = index 2
+      // X = index 23
+      // Y = index 24
+      if (cols.length > 24 && index > 0) { // skip header row
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${cols[1]}</td>
+          <td>${cols[2]}</td>
+          <td>${cols[23]}</td>
+          <td>${cols[24]}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    });
+  })
+  .catch(err => console.error("Error loading sheet:", err));
+</script>
+
+</body>
+</html>
