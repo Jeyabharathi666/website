@@ -1,123 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Live Sheet Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<title>Live Sheet Dashboard</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
-      background: #f4f6f8;
-      color: #333;
-    }
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    background: #f5f7fb;
+  }
 
-    header {
-      background: linear-gradient(135deg, #1f2937, #111827);
-      color: white;
-      padding: 16px 24px;
-      font-size: 20px;
-      font-weight: 600;
-    }
+  header {
+    background: linear-gradient(90deg, #0f172a, #020617);
+    color: #fff;
+    padding: 16px 28px;
+    font-size: 20px;
+    font-weight: 600;
+  }
 
-    .container {
-      padding: 20px;
-      max-width: 1200px;
-      margin: auto;
-    }
+  .container {
+    max-width: 1200px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 20px;
+  }
 
-    .controls {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 12px;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
 
-    .controls input {
-      padding: 8px 12px;
-      font-size: 14px;
-      width: 260px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
+  .search {
+    width: 260px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+  }
 
-    .badge {
-      background: #2563eb;
-      color: white;
-      padding: 6px 12px;
-      border-radius: 999px;
-      font-size: 13px;
-    }
+  .badge {
+    background: #2563eb;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
 
-    thead {
-      background: #f1f5f9;
-    }
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    font-size: 14px;
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+  }
 
-    th, td {
-      padding: 12px 14px;
-      text-align: left;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 14px;
-    }
+  tbody td {
+    padding: 12px 16px;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 14px;
+  }
 
-    th {
-      cursor: pointer;
-      user-select: none;
-    }
+  tbody tr:hover {
+    background: #f1f5f9;
+  }
 
-    tbody tr:hover {
-      background: #f9fafb;
-    }
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 16px;
+  }
 
-    .fade {
-      font-size: 12px;
-      color: #6b7280;
-    }
+  .m-green { color: #16a34a; font-weight: 600; }
+  .m-blue { color: #2563eb; font-weight: 600; }
+  .m-yellow { color: #ca8a04; font-weight: 600; }
+  .m-red { color: #dc2626; font-weight: 600; }
 
-    footer {
-      text-align: center;
-      padding: 12px;
-      font-size: 12px;
-      color: #6b7280;
-    }
-
-    @media (max-width: 600px) {
-      th, td {
-        padding: 8px;
-        font-size: 13px;
-      }
-      .controls input {
-        width: 100%;
-      }
-    }
-  </style>
+</style>
 </head>
+
 <body>
 
-<header>
-  📊 Live Sheet Dashboard
-</header>
+<header>📊 Live Sheet Dashboard</header>
 
 <div class="container">
 
-  <div class="controls">
-    <input type="text" id="search" placeholder="🔍 Search..." onkeyup="filterTable()">
-    <div class="badge" id="rowCount">Loading…</div>
+  <div class="toolbar">
+    <input id="search" class="search" placeholder="🔍 Search NSE / Analyse..." />
+    <span id="rowCount" class="badge">0 rows</span>
   </div>
 
-  <table id="dataTable">
+  <table>
     <thead>
       <tr>
         <th>NSE CODE</th>
@@ -126,66 +112,63 @@
         <th>D-CAL</th>
       </tr>
     </thead>
-    <tbody></tbody>
+    <tbody id="tableBody"></tbody>
   </table>
+
+  <div class="footer">
+    Auto-refresh every 60 seconds · Powered by Google Sheets
+  </div>
 
 </div>
 
-<footer>
-  Auto-refresh every 60 seconds · Powered by Google Sheets
-</footer>
-
 <script>
-const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
-const tbody = document.querySelector("#dataTable tbody");
+const CSV_URL =
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
+
+const tableBody = document.getElementById("tableBody");
 const rowCount = document.getElementById("rowCount");
+const searchBox = document.getElementById("search");
 
-// Robust CSV parser
-function parseCSVRow(row) {
-  const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
-  return row.match(regex)?.map(c => c.replace(/^"|"$/g, "").trim()) || [];
-}
+async function loadData() {
+  const res = await fetch(CSV_URL + "&t=" + Date.now());
+  const text = await res.text();
 
-function loadData() {
-  fetch(csvUrl + "&t=" + Date.now())
-    .then(res => res.text())
-    .then(csv => {
-      tbody.innerHTML = "";
-      let count = 0;
+  const rows = text.split("\n").slice(1);
+  tableBody.innerHTML = "";
 
-      csv.split("\n").slice(1).forEach(row => {
-        if (!row.trim()) return;
-        const cols = parseCSVRow(row);
+  rows.forEach(row => {
+    const cols = row.split(",");
 
-        if (cols.length >= 25) {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${cols[1]}</td>   <!-- B -->
-            <td>${cols[4]}</td>   <!-- E -->
-            <td>${cols[23]}</td>  <!-- X -->
-            <td>${cols[24]}</td>  <!-- Y -->
-          `;
-          tbody.appendChild(tr);
-          count++;
-        }
-      });
+    if (!cols[1] || !cols[4]) return; // skip empty rows
 
-      rowCount.textContent = count + " rows";
-    });
-}
+    const tr = document.createElement("tr");
 
-function filterTable() {
-  const q = document.getElementById("search").value.toLowerCase();
-  let visible = 0;
+    tr.innerHTML = `
+      <td>${cols[1]?.trim() || "-"}</td>
+      <td>${cols[4]?.trim() || "-"}</td>
+      <td>${cols[23]?.trim() || "-"}</td>
+      <td>${cols[24]?.trim() || "-"}</td>
+    `;
 
-  Array.from(tbody.rows).forEach(row => {
-    const match = row.innerText.toLowerCase().includes(q);
-    row.style.display = match ? "" : "none";
-    if (match) visible++;
+    // M-CAL coloring
+    const mcal = tr.children[2].innerText;
+    if (mcal.includes("M-S1")) tr.children[2].className = "m-green";
+    else if (mcal.includes("M-S2")) tr.children[2].className = "m-blue";
+    else if (mcal.includes("M-S3")) tr.children[2].className = "m-yellow";
+    else if (mcal.includes("M-S4")) tr.children[2].className = "m-red";
+
+    tableBody.appendChild(tr);
   });
 
-  rowCount.textContent = visible + " rows";
+  rowCount.innerText = tableBody.children.length + " rows";
 }
+
+searchBox.addEventListener("input", () => {
+  const q = searchBox.value.toLowerCase();
+  [...tableBody.rows].forEach(r => {
+    r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+  });
+});
 
 loadData();
 setInterval(loadData, 60000);
