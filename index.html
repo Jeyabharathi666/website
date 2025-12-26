@@ -28,37 +28,48 @@
 
 <script>
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
+const tbody = document.querySelector("#dataTable tbody");
 
-fetch(csvUrl)
-  .then(response => response.text())
-  .then(csvData => {
-    const rows = csvData.split("\n");
-    const tbody = document.querySelector("#dataTable tbody");
+// Proper CSV row parser (handles commas inside quotes)
+function parseCSVRow(row) {
+  const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
+  return row.match(regex)?.map(cell =>
+    cell.replace(/^"|"$/g, "").trim()
+  ) || [];
+}
 
-    rows.forEach((row, index) => {
-      if (row.trim() === "") return; // skip empty lines
+function loadData() {
+  fetch(csvUrl + "&t=" + Date.now())
+    .then(res => res.text())
+    .then(csv => {
+      tbody.innerHTML = "";
+      const rows = csv.split("\n").slice(1); // skip header
 
-      const cols = row.split(",");
+      rows.forEach(row => {
+        if (!row.trim()) return;
 
-      // We want:
-      // B = index 1
-      // C = index 2
-      // X = index 23
-      // Y = index 24
-      if (cols.length > 24 && index > 0) { // skip header row
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${cols[1]}</td>
-          <td>${cols[2]}</td>
-          <td>${cols[23]}</td>
-          <td>${cols[24]}</td>
-        `;
-        tbody.appendChild(tr);
-      }
-    });
-  })
-  .catch(err => console.error("Error loading sheet:", err));
+        const cols = parseCSVRow(row);
+
+        // Ensure enough columns exist
+        if (cols.length >= 25) {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${cols[1] || ""}</td>   <!-- B -->
+            <td>${cols[2] || ""}</td>   <!-- C -->
+            <td>${cols[23] || ""}</td>  <!-- X -->
+            <td>${cols[24] || ""}</td>  <!-- Y -->
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+    })
+    .catch(err => console.error("CSV load error:", err));
+}
+
+loadData();
+setInterval(loadData, 60000); // refresh every 60 seconds
 </script>
+
 
 </body>
 </html>
