@@ -20,7 +20,7 @@
   }
 
   .container {
-    max-width: 1200px;
+    max-width: 1300px;
     margin: 20px auto;
     background: #fff;
     border-radius: 12px;
@@ -62,13 +62,13 @@
     top: 0;
     background: #f8fafc;
     font-size: 14px;
-    text-align: left;
-    padding: 12px 16px;
+    padding: 12px 14px;
     border-bottom: 1px solid #e5e7eb;
+    text-align: left;
   }
 
   tbody td {
-    padding: 12px 16px;
+    padding: 12px 14px;
     border-bottom: 1px solid #eef2f7;
     font-size: 14px;
   }
@@ -86,17 +86,17 @@
 
   /* ===== COLOR SCALES ===== */
 
-  /* Green scale (M-S1 → M-S4) */
-  .m-s1 { color: #4ade80; font-weight: 600; } /* light green */
-  .m-s2 { color: #4ade80; font-weight: 600; }
-  .m-s3 { color: #4ade80; font-weight: 600; }
-  .m-s4 { color: #4ade80; font-weight: 600; } /* dark green */
+  /* Green (M-S1 → M-S4) */
+  .m-s1 { color: #4ade80; font-weight: 600; }
+  .m-s2 { color: #22c55e; font-weight: 600; }
+  .m-s3 { color: #16a34a; font-weight: 600; }
+  .m-s4 { color: #14532d; font-weight: 600; }
 
-  /* Blue scale (others) */
-  .m-b1 { color: #93c5fd; font-weight: 600; } /* light blue */
-  .m-b2 { color: #93c5fd; font-weight: 600; }
-  .m-b3 { color: #93c5fd; font-weight: 600; }
-  .m-b4 { color: #93c5fd; font-weight: 600; } /* dark blue */
+  /* Blue (others) */
+  .m-b1 { color: #93c5fd; font-weight: 600; }
+  .m-b2 { color: #60a5fa; font-weight: 600; }
+  .m-b3 { color: #2563eb; font-weight: 600; }
+  .m-b4 { color: #1e3a8a; font-weight: 600; }
 
 </style>
 </head>
@@ -116,7 +116,11 @@
     <thead>
       <tr>
         <th>NSE CODE</th>
+        <th>DCHG</th>
+        <th>CMP</th>
         <th>Weightage</th>
+        <th>Tgt-I</th>
+        <th>Tgt-II</th>
         <th>M-Res/Sup</th>
         <th>D-Res/Sup</th>
       </tr>
@@ -146,33 +150,34 @@ async function loadData() {
   tableBody.innerHTML = "";
 
   rows.forEach(row => {
-    const cols = row.split(",");
+    const c = row.split(",");
 
-    if (!cols[1] || !cols[4]) return;
+    if (!c[1]) return; // skip empty NSE
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${cols[1]?.trim() || "-"}</td>
-      <td>${cols[4]?.trim() || "-"}</td>
-      <td>${cols[23]?.trim() || "-"}</td>
-      <td>${cols[24]?.trim() || "-"}</td>
+      <td>${c[1] || "-"}</td>   <!-- B NSE -->
+      <td>${c[2] || "-"}</td>   <!-- C DCHG -->
+      <td>${c[3] || "-"}</td>   <!-- D CMP -->
+      <td>${c[4] || "-"}</td>   <!-- E Weightage -->
+      <td>${c[7] || "-"}</td>   <!-- H Tgt-I -->
+      <td>${c[9] || "-"}</td>   <!-- J Tgt-II -->
+      <td>${c[23] || "-"}</td>  <!-- X M-Res/Sup -->
+      <td>${c[24] || "-"}</td>  <!-- Y D-Res/Sup -->
     `;
 
-    /* ===== M-RES/SUP COLOR LOGIC ===== */
-    const mCell = tr.children[2];
-    const value = mCell.innerText.toUpperCase();
+    /* M-RES/SUP COLOR */
+    const mCell = tr.children[6];
+    const val = mCell.innerText.toUpperCase();
 
-    // GREEN: M-S1 → M-S4
-    if (value.includes("M-S1")) mCell.className = "m-s1";
-    else if (value.includes("M-S2")) mCell.className = "m-s2";
-    else if (value.includes("M-S3")) mCell.className = "m-s3";
-    else if (value.includes("M-S4")) mCell.className = "m-s4";
-
-    // BLUE: everything else
-    else if (value.includes("1")) mCell.className = "m-b1";
-    else if (value.includes("2")) mCell.className = "m-b2";
-    else if (value.includes("3")) mCell.className = "m-b3";
+    if (val.includes("M-S1")) mCell.className = "m-s1";
+    else if (val.includes("M-S2")) mCell.className = "m-s2";
+    else if (val.includes("M-S3")) mCell.className = "m-s3";
+    else if (val.includes("M-S4")) mCell.className = "m-s4";
+    else if (val.includes("1")) mCell.className = "m-b1";
+    else if (val.includes("2")) mCell.className = "m-b2";
+    else if (val.includes("3")) mCell.className = "m-b3";
     else mCell.className = "m-b4";
 
     tableBody.appendChild(tr);
