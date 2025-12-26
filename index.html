@@ -1,41 +1,149 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Google Sheet Data</title>
+  <title>Live Sheet Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-    th, td { border: 1px solid #888; padding: 8px; text-align: left; }
-    th { background: #f2f2f2; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      background: #f4f6f8;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(135deg, #1f2937, #111827);
+      color: white;
+      padding: 16px 24px;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    .container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .controls input {
+      padding: 8px 12px;
+      font-size: 14px;
+      width: 260px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .badge {
+      background: #2563eb;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    thead {
+      background: #f1f5f9;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+
+    th {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .fade {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    footer {
+      text-align: center;
+      padding: 12px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    @media (max-width: 600px) {
+      th, td {
+        padding: 8px;
+        font-size: 13px;
+      }
+      .controls input {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 <body>
 
-<h2>Sheet Data (Columns B, C, X, Y)</h2>
+<header>
+  📊 Live Sheet Dashboard
+</header>
 
-<table id="dataTable">
-  <thead>
-    <tr>
-      <th>B</th>
-      <th>C</th>
-      <th>X</th>
-      <th>Y</th>
-    </tr>
-  </thead>
-  <tbody></tbody>
-</table>
+<div class="container">
+
+  <div class="controls">
+    <input type="text" id="search" placeholder="🔍 Search..." onkeyup="filterTable()">
+    <div class="badge" id="rowCount">Loading…</div>
+  </div>
+
+  <table id="dataTable">
+    <thead>
+      <tr>
+        <th>B</th>
+        <th>E</th>
+        <th>X</th>
+        <th>Y</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+
+<footer>
+  Auto-refresh every 60 seconds · Powered by Google Sheets
+</footer>
 
 <script>
 const csvUrl = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
 const tbody = document.querySelector("#dataTable tbody");
+const rowCount = document.getElementById("rowCount");
 
-// Proper CSV row parser (handles commas inside quotes)
+// Robust CSV parser
 function parseCSVRow(row) {
   const regex = /(".*?"|[^",]+)(?=\s*,|\s*$)/g;
-  return row.match(regex)?.map(cell =>
-    cell.replace(/^"|"$/g, "").trim()
-  ) || [];
+  return row.match(regex)?.map(c => c.replace(/^"|"$/g, "").trim()) || [];
 }
 
 function loadData() {
@@ -43,33 +151,45 @@ function loadData() {
     .then(res => res.text())
     .then(csv => {
       tbody.innerHTML = "";
-      const rows = csv.split("\n").slice(1); // skip header
+      let count = 0;
 
-      rows.forEach(row => {
+      csv.split("\n").slice(1).forEach(row => {
         if (!row.trim()) return;
-
         const cols = parseCSVRow(row);
 
-        // Ensure enough columns exist
         if (cols.length >= 25) {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${cols[1] || ""}</td>   <!-- B -->
-            <td>${cols[2] || ""}</td>   <!-- C -->
-            <td>${cols[23] || ""}</td>  <!-- X -->
-            <td>${cols[24] || ""}</td>  <!-- Y -->
+            <td>${cols[1]}</td>   <!-- B -->
+            <td>${cols[4]}</td>   <!-- E -->
+            <td>${cols[23]}</td>  <!-- X -->
+            <td>${cols[24]}</td>  <!-- Y -->
           `;
           tbody.appendChild(tr);
+          count++;
         }
       });
-    })
-    .catch(err => console.error("CSV load error:", err));
+
+      rowCount.textContent = count + " rows";
+    });
+}
+
+function filterTable() {
+  const q = document.getElementById("search").value.toLowerCase();
+  let visible = 0;
+
+  Array.from(tbody.rows).forEach(row => {
+    const match = row.innerText.toLowerCase().includes(q);
+    row.style.display = match ? "" : "none";
+    if (match) visible++;
+  });
+
+  rowCount.textContent = visible + " rows";
 }
 
 loadData();
-setInterval(loadData, 60000); // refresh every 60 seconds
+setInterval(loadData, 60000);
 </script>
-
 
 </body>
 </html>
