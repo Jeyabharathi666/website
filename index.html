@@ -84,10 +84,19 @@
     margin-top: 16px;
   }
 
-  .m-green { color: #16a34a; font-weight: 600; }
-  .m-blue { color: #2563eb; font-weight: 600; }
-  .m-yellow { color: #ca8a04; font-weight: 600; }
-  .m-red { color: #dc2626; font-weight: 600; }
+  /* ===== COLOR SCALES ===== */
+
+  /* Green scale (M-S1 → M-S4) */
+  .m-s1 { color: #4ade80; font-weight: 600; } /* light green */
+  .m-s2 { color: #22c55e; font-weight: 600; }
+  .m-s3 { color: #16a34a; font-weight: 600; }
+  .m-s4 { color: #14532d; font-weight: 600; } /* dark green */
+
+  /* Blue scale (others) */
+  .m-b1 { color: #93c5fd; font-weight: 600; } /* light blue */
+  .m-b2 { color: #60a5fa; font-weight: 600; }
+  .m-b3 { color: #2563eb; font-weight: 600; }
+  .m-b4 { color: #1e3a8a; font-weight: 600; } /* dark blue */
 
 </style>
 </head>
@@ -139,7 +148,7 @@ async function loadData() {
   rows.forEach(row => {
     const cols = row.split(",");
 
-    if (!cols[1] || !cols[4]) return; // skip empty rows
+    if (!cols[1] || !cols[4]) return;
 
     const tr = document.createElement("tr");
 
@@ -150,12 +159,21 @@ async function loadData() {
       <td>${cols[24]?.trim() || "-"}</td>
     `;
 
-    // M-CAL coloring
-    const mcal = tr.children[2].innerText;
-    if (mcal.includes("M-S1")) tr.children[2].className = "m-green";
-    else if (mcal.includes("M-S2")) tr.children[2].className = "m-blue";
-    else if (mcal.includes("M-S3")) tr.children[2].className = "m-yellow";
-    else if (mcal.includes("M-S4")) tr.children[2].className = "m-red";
+    /* ===== M-RES/SUP COLOR LOGIC ===== */
+    const mCell = tr.children[2];
+    const value = mCell.innerText.toUpperCase();
+
+    // GREEN: M-S1 → M-S4
+    if (value.includes("M-S1")) mCell.className = "m-s1";
+    else if (value.includes("M-S2")) mCell.className = "m-s2";
+    else if (value.includes("M-S3")) mCell.className = "m-s3";
+    else if (value.includes("M-S4")) mCell.className = "m-s4";
+
+    // BLUE: everything else
+    else if (value.includes("1")) mCell.className = "m-b1";
+    else if (value.includes("2")) mCell.className = "m-b2";
+    else if (value.includes("3")) mCell.className = "m-b3";
+    else mCell.className = "m-b4";
 
     tableBody.appendChild(tr);
   });
