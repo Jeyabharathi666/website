@@ -86,18 +86,15 @@
 
   /* ===== COLOR SCALES ===== */
 
-  /* Green (M-S1 → M-S4) */
-  .m-s1 { color: #4ade80; font-weight: 600; }
-  .m-s2 { color: #4ade80; font-weight: 600; }
-  .m-s3 { color: #4ade80; font-weight: 600; }
-  .m-s4 { color: #4ade80; font-weight: 600; }
+  .m-s1, .m-s2, .m-s3, .m-s4 {
+    color: #4ade80;
+    font-weight: 600;
+  }
 
-  /* Blue (others) */
-  .m-b1 { color: #93c5fd; font-weight: 600; }
-  .m-b2 { color: #93c5fd; font-weight: 600; }
-  .m-b3 { color: #93c5fd; font-weight: 600; }
-  .m-b4 { color: #93c5fd; font-weight: 600; }
-
+  .m-b1, .m-b2, .m-b3, .m-b4 {
+    color: #93c5fd;
+    font-weight: 600;
+  }
 </style>
 </head>
 
@@ -119,6 +116,8 @@
         <th>DCHG</th>
         <th>CMP</th>
         <th>Weightage</th>
+        <th>Book Value</th>   <!-- M -->
+        <th>Dividend</th>     <!-- N -->
         <th>Tgt-I</th>
         <th>Tgt-II</th>
         <th>M-Res/Sup</th>
@@ -152,23 +151,24 @@ async function loadData() {
   rows.forEach(row => {
     const c = row.split(",");
 
-    if (!c[1]) return; // skip empty NSE
+    if (!c[1]) return;
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${c[1] || "-"}</td>   <!-- B NSE -->
-      <td>${c[2] || "-"}</td>   <!-- C DCHG -->
-      <td>${c[3] || "-"}</td>   <!-- D CMP -->
-      <td>${c[4] || "-"}</td>   <!-- E Weightage -->
-      <td>${c[7] || "-"}</td>   <!-- H Tgt-I -->
-      <td>${c[9] || "-"}</td>   <!-- J Tgt-II -->
-      <td>${c[23] || "-"}</td>  <!-- X M-Res/Sup -->
-      <td>${c[24] || "-"}</td>  <!-- Y D-Res/Sup -->
+      <td>${c[1] || "-"}</td>    <!-- B NSE -->
+      <td>${c[2] || "-"}</td>    <!-- C DCHG -->
+      <td>${c[3] || "-"}</td>    <!-- D CMP -->
+      <td>${c[4] || "-"}</td>    <!-- E Weightage -->
+      <td>${c[12] || "-"}</td>   <!-- M Book Value -->
+      <td>${c[13] || "-"}</td>   <!-- N Dividend -->
+      <td>${c[7] || "-"}</td>    <!-- H Tgt-I -->
+      <td>${c[9] || "-"}</td>    <!-- J Tgt-II -->
+      <td>${c[23] || "-"}</td>   <!-- X M-Res/Sup -->
+      <td>${c[24] || "-"}</td>   <!-- Y D-Res/Sup -->
     `;
 
-    /* M-RES/SUP COLOR */
-    const mCell = tr.children[6];
+    const mCell = tr.children[8];
     const val = mCell.innerText.toUpperCase();
 
     if (val.includes("M-S1")) mCell.className = "m-s1";
