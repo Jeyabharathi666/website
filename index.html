@@ -108,6 +108,326 @@
 
 <header>📊 Live Sheet Dashboard - Combined</header>
 
+<!-- ===== BONDS TABLE ===== -->
+<div class="container" id="bondsContainer">
+  <h2>Bonds</h2>
+  <div class="toolbar">
+    <input id="searchBonds" class="search" placeholder="🔍 Search Bonds..." />
+    <span id="rowCountBonds" class="badge">0 rows</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>Bond Name</th>
+        <th>Coupon</th>
+        <th>Maturity</th>
+        <th>Rating</th>
+        <th>Interest Payment</th>
+        <th>Yield</th>
+        <th>Price</th>
+      </tr>
+    </thead>
+    <tbody id="tableBodyBonds"></tbody>
+  </table>
+  <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
+</div>
+
+<!-- ===== STOCK SHEET 1 ===== -->
+<div class="container" id="sheet1Container">
+  <h2>Core Stocks</h2>
+  <div class="toolbar">
+    <input id="search1" class="search" placeholder="🔍 Search Sheet 1..." />
+    <span id="rowCount1" class="badge">0 rows</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>NSE CODE</th>
+        <th>DCHG</th>
+        <th>CMP</th>
+        <th>Weightage</th>
+        <th>Book Value</th>
+        <th>Dividend</th>
+        <th>Tgt-I</th>
+        <th>Tgt-II</th>
+        <th>M-Res/Sup</th>
+        <th>D-Res/Sup</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody1"></tbody>
+  </table>
+  <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
+</div>
+
+<!-- ===== STOCK SHEET 2 ===== -->
+<div class="container" id="sheet2Container">
+  <h2>Additional Stocks</h2>
+  <div class="toolbar">
+    <input id="search2" class="search" placeholder="🔍 Search Sheet 2..." />
+    <span id="rowCount2" class="badge">0 rows</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>NSE CODE</th>
+        <th>DCHG</th>
+        <th>CMP</th>
+        <th>Weightage</th>
+        <th>Book Value</th>
+        <th>Dividend</th>
+        <th>Tgt-I</th>
+        <th>Tgt-II</th>
+        <th>M-Res/Sup</th>
+        <th>D-Res/Sup</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody2"></tbody>
+  </table>
+  <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
+</div>
+
+<script>
+/* ===== CONFIG SHEETS ===== */
+const bondsSheet = {
+  csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=783175366&single=true&output=csv",
+  tableBody: document.getElementById("tableBodyBonds"),
+  rowCount: document.getElementById("rowCountBonds"),
+  searchBox: document.getElementById("searchBonds")
+};
+
+const stockSheets = [
+  {
+    csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv",
+    tableBody: document.getElementById("tableBody1"),
+    rowCount: document.getElementById("rowCount1"),
+    searchBox: document.getElementById("search1")
+  },
+  {
+    csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1740124441&single=true&output=csv",
+    tableBody: document.getElementById("tableBody2"),
+    rowCount: document.getElementById("rowCount2"),
+    searchBox: document.getElementById("search2")
+  }
+];
+
+/* ===== HELPER: WEIGHTAGE TO STARS ===== */
+function weightToStars(val) {
+  const n = parseInt(val, 10);
+  if (n >= 2 && n <= 3) return "⭐⭐";
+  if (n >= 4 && n <= 6) return "⭐⭐⭐";
+  if (n >= 7 && n <= 9) return "⭐⭐⭐⭐";
+  if (n >= 10 && n <= 12) return "⭐⭐⭐⭐⭐";
+  return "-";
+}
+
+/* ===== LOAD BONDS TABLE ===== */
+async function loadBonds(sheet) {
+  const res = await fetch(sheet.csv + "&t=" + Date.now());
+  const text = await res.text();
+
+  const rows = text.split("\n").slice(1);
+  sheet.tableBody.innerHTML = "";
+
+  rows.forEach(r => {
+    const c = r.split(",");
+    if (!c[0]) return; // skip empty Bond Name
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c[0] || "-"}</td>
+      <td>${c[1] || "-"}</td>
+      <td>${c[2] || "-"}</td>
+      <td>${c[3] || "-"}</td>
+      <td>${c[4] || "-"}</td>
+      <td>${c[5] || "-"}</td>
+      <td>${c[6] || "-"}</td>
+    `;
+    sheet.tableBody.appendChild(tr);
+  });
+
+  sheet.rowCount.innerText = sheet.tableBody.children.length + " rows";
+
+  sheet.searchBox.addEventListener("input", () => {
+    const q = sheet.searchBox.value.toLowerCase();
+    [...sheet.tableBody.rows].forEach(r => {
+      r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+}
+
+/* ===== LOAD STOCK SHEETS ===== */
+async function loadStockSheet(sheet) {
+  const res = await fetch(sheet.csv + "&t=" + Date.now());
+  const text = await res.text();
+
+  const rows = text.split("\n").slice(1);
+  sheet.tableBody.innerHTML = "";
+
+  rows.forEach(row => {
+    const c = row.split(",");
+    if (!c[1]) return;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${c[1] || "-"}</td>
+      <td>${c[2] || "-"}</td>
+      <td>${c[3] || "-"}</td>
+      <td class="stars">${weightToStars(c[4])}</td>
+      <td>${c[12] || "-"}</td>
+      <td>${c[13] || "-"}</td>
+      <td>${c[7] || "-"}</td>
+      <td>${c[9] || "-"}</td>
+      <td>${c[23] || "-"}</td>
+      <td>${c[24] || "-"}</td>
+    `;
+
+    const mCell = tr.children[8];
+    const val = mCell.innerText.toUpperCase();
+    if (val.includes("M-S1")) mCell.className = "m-s1";
+    else if (val.includes("M-S2")) mCell.className = "m-s2";
+    else if (val.includes("M-S3")) mCell.className = "m-s3";
+    else if (val.includes("M-S4")) mCell.className = "m-s4";
+    else if (val.includes("1")) mCell.className = "m-b1";
+    else if (val.includes("2")) mCell.className = "m-b2";
+    else if (val.includes("3")) mCell.className = "m-b3";
+    else mCell.className = "m-b4";
+
+    sheet.tableBody.appendChild(tr);
+  });
+
+  sheet.rowCount.innerText = sheet.tableBody.children.length + " rows";
+
+  sheet.searchBox.addEventListener("input", () => {
+    const q = sheet.searchBox.value.toLowerCase();
+    [...sheet.tableBody.rows].forEach(r => {
+      r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
+}
+
+/* ===== INITIAL LOAD ===== */
+loadBonds(bondsSheet);
+stockSheets.forEach(s => loadStockSheet(s));
+
+/* ===== AUTO REFRESH EVERY 30 MIN ===== */
+setInterval(() => {
+  loadBonds(bondsSheet);
+  stockSheets.forEach(s => loadStockSheet(s));
+}, 1800000);
+</script>
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Live Sheet Dashboard - Combined</title>
+
+<style>
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont;
+    background: #f5f7fb;
+  }
+
+  header {
+    background: linear-gradient(90deg, #0f172a, #020617);
+    color: #fff;
+    padding: 16px 28px;
+    font-size: 20px;
+    font-weight: 600;
+  }
+
+  .container {
+    max-width: 1300px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    padding: 20px;
+    margin-bottom: 40px;
+  }
+
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .search {
+    width: 260px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+  }
+
+  .badge {
+    background: #2563eb;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+  }
+
+  thead th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    font-size: 14px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #e5e7eb;
+    text-align: left;
+  }
+
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eef2f7;
+    font-size: 14px;
+  }
+
+  tbody tr:hover {
+    background: #f1f5f9;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 16px;
+  }
+
+  .m-s1, .m-s2, .m-s3, .m-s4 {
+    color: #4ade80;
+    font-weight: 600;
+  }
+
+  .m-b1, .m-b2, .m-b3, .m-b4 {
+    color: #93c5fd;
+    font-weight: 600;
+  }
+
+  .stars {
+    color: #facc15;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
+</style>
+</head>
+
+<body>
+
+<header>📊 Live Sheet Dashboard - Combined</header>
+
 <!-- ===== TABLE 1 ===== -->
 <div class="container" id="sheet1Container">
   <h2>Sheet 1</h2>
