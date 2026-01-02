@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Live Sheet Dashboard</title>
+<title>Live Sheet Dashboard - Combined</title>
 
 <style>
   body {
@@ -26,6 +26,7 @@
     border-radius: 12px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.08);
     padding: 20px;
+    margin-bottom: 40px;
   }
 
   .toolbar {
@@ -55,6 +56,7 @@
   table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 10px;
   }
 
   thead th {
@@ -84,8 +86,6 @@
     margin-top: 16px;
   }
 
-  /* ===== COLOR SCALES ===== */
-
   .m-s1, .m-s2, .m-s3, .m-s4 {
     color: #4ade80;
     font-weight: 600;
@@ -106,15 +106,15 @@
 
 <body>
 
-<header>📊 Live Sheet Dashboard</header>
+<header>📊 Live Sheet Dashboard - Combined</header>
 
-<div class="container">
-
+<!-- ===== TABLE 1 ===== -->
+<div class="container" id="sheet1Container">
+  <h2>Sheet 1</h2>
   <div class="toolbar">
-    <input id="search" class="search" placeholder="🔍 Search NSE / Analyse..." />
-    <span id="rowCount" class="badge">0 rows</span>
+    <input id="search1" class="search" placeholder="🔍 Search Sheet 1..." />
+    <span id="rowCount1" class="badge">0 rows</span>
   </div>
-
   <table>
     <thead>
       <tr>
@@ -130,24 +130,54 @@
         <th>D-Res/Sup</th>
       </tr>
     </thead>
-    <tbody id="tableBody"></tbody>
+    <tbody id="tableBody1"></tbody>
   </table>
+  <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
+</div>
 
-  <div class="footer">
-    Auto-refresh every 60 seconds · Powered by Google Sheets
+<!-- ===== TABLE 2 ===== -->
+<div class="container" id="sheet2Container">
+  <h2>Sheet 2</h2>
+  <div class="toolbar">
+    <input id="search2" class="search" placeholder="🔍 Search Sheet 2..." />
+    <span id="rowCount2" class="badge">0 rows</span>
   </div>
-
+  <table>
+    <thead>
+      <tr>
+        <th>NSE CODE</th>
+        <th>DCHG</th>
+        <th>CMP</th>
+        <th>Weightage</th>
+        <th>Book Value</th>
+        <th>Dividend</th>
+        <th>Tgt-I</th>
+        <th>Tgt-II</th>
+        <th>M-Res/Sup</th>
+        <th>D-Res/Sup</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody2"></tbody>
+  </table>
+  <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
 </div>
 
 <script>
-const CSV_URL =
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv";
+const sheets = [
+  {
+    csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=971694303&single=true&output=csv",
+    tableBody: document.getElementById("tableBody1"),
+    rowCount: document.getElementById("rowCount1"),
+    searchBox: document.getElementById("search1")
+  },
+  {
+    csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1740124441&single=true&output=csv",
+    tableBody: document.getElementById("tableBody2"),
+    rowCount: document.getElementById("rowCount2"),
+    searchBox: document.getElementById("search2")
+  }
+];
 
-const tableBody = document.getElementById("tableBody");
-const rowCount = document.getElementById("rowCount");
-const searchBox = document.getElementById("search");
-
-/* ===== WEIGHTAGE → STARS ===== */
 function weightToStars(val) {
   const n = parseInt(val, 10);
   if (n >= 2 && n <= 3) return "⭐⭐";
@@ -157,12 +187,12 @@ function weightToStars(val) {
   return "-";
 }
 
-async function loadData() {
-  const res = await fetch(CSV_URL + "&t=" + Date.now());
+async function loadSheet(sheet) {
+  const res = await fetch(sheet.csv + "&t=" + Date.now());
   const text = await res.text();
 
   const rows = text.split("\n").slice(1);
-  tableBody.innerHTML = "";
+  sheet.tableBody.innerHTML = "";
 
   rows.forEach(row => {
     const c = row.split(",");
@@ -185,7 +215,6 @@ async function loadData() {
 
     const mCell = tr.children[8];
     const val = mCell.innerText.toUpperCase();
-
     if (val.includes("M-S1")) mCell.className = "m-s1";
     else if (val.includes("M-S2")) mCell.className = "m-s2";
     else if (val.includes("M-S3")) mCell.className = "m-s3";
@@ -195,21 +224,25 @@ async function loadData() {
     else if (val.includes("3")) mCell.className = "m-b3";
     else mCell.className = "m-b4";
 
-    tableBody.appendChild(tr);
+    sheet.tableBody.appendChild(tr);
   });
 
-  rowCount.innerText = tableBody.children.length + " rows";
+  sheet.rowCount.innerText = sheet.tableBody.children.length + " rows";
+
+  // Search
+  sheet.searchBox.addEventListener("input", () => {
+    const q = sheet.searchBox.value.toLowerCase();
+    [...sheet.tableBody.rows].forEach(r => {
+      r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+    });
+  });
 }
 
-searchBox.addEventListener("input", () => {
-  const q = searchBox.value.toLowerCase();
-  [...tableBody.rows].forEach(r => {
-    r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
-  });
-});
+// Load all sheets initially
+sheets.forEach(sheet => loadSheet(sheet));
 
-loadData();
-setInterval(loadData, 1800000);
+// Auto-refresh every 30 min
+setInterval(() => sheets.forEach(sheet => loadSheet(sheet)), 1800000);
 </script>
 
 </body>
