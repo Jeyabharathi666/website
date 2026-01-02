@@ -95,6 +95,12 @@
     color: #93c5fd;
     font-weight: 600;
   }
+
+  .stars {
+    color: #facc15;
+    font-size: 16px;
+    letter-spacing: 1px;
+  }
 </style>
 </head>
 
@@ -116,8 +122,8 @@
         <th>DCHG</th>
         <th>CMP</th>
         <th>Weightage</th>
-        <th>Book Value</th>   <!-- M -->
-        <th>Dividend</th>     <!-- N -->
+        <th>Book Value</th>
+        <th>Dividend</th>
         <th>Tgt-I</th>
         <th>Tgt-II</th>
         <th>M-Res/Sup</th>
@@ -141,6 +147,16 @@ const tableBody = document.getElementById("tableBody");
 const rowCount = document.getElementById("rowCount");
 const searchBox = document.getElementById("search");
 
+/* ===== WEIGHTAGE → STARS ===== */
+function weightToStars(val) {
+  const n = parseInt(val, 10);
+  if (n >= 2 && n <= 3) return "⭐⭐";
+  if (n >= 4 && n <= 6) return "⭐⭐⭐";
+  if (n >= 7 && n <= 9) return "⭐⭐⭐⭐";
+  if (n >= 10 && n <= 12) return "⭐⭐⭐⭐⭐";
+  return "-";
+}
+
 async function loadData() {
   const res = await fetch(CSV_URL + "&t=" + Date.now());
   const text = await res.text();
@@ -150,22 +166,21 @@ async function loadData() {
 
   rows.forEach(row => {
     const c = row.split(",");
-
     if (!c[1]) return;
 
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${c[1] || "-"}</td>    <!-- B NSE -->
-      <td>${c[2] || "-"}</td>    <!-- C DCHG -->
-      <td>${c[3] || "-"}</td>    <!-- D CMP -->
-      <td>${c[4] || "-"}</td>    <!-- E Weightage -->
-      <td>${c[12] || "-"}</td>   <!-- M Book Value -->
-      <td>${c[13] || "-"}</td>   <!-- N Dividend -->
-      <td>${c[7] || "-"}</td>    <!-- H Tgt-I -->
-      <td>${c[9] || "-"}</td>    <!-- J Tgt-II -->
-      <td>${c[23] || "-"}</td>   <!-- X M-Res/Sup -->
-      <td>${c[24] || "-"}</td>   <!-- Y D-Res/Sup -->
+      <td>${c[1] || "-"}</td>
+      <td>${c[2] || "-"}</td>
+      <td>${c[3] || "-"}</td>
+      <td class="stars">${weightToStars(c[4])}</td>
+      <td>${c[12] || "-"}</td>
+      <td>${c[13] || "-"}</td>
+      <td>${c[7] || "-"}</td>
+      <td>${c[9] || "-"}</td>
+      <td>${c[23] || "-"}</td>
+      <td>${c[24] || "-"}</td>
     `;
 
     const mCell = tr.children[8];
