@@ -189,11 +189,12 @@
 <script>
 /* ===== CONFIG SHEETS ===== */
 const bondsSheet = {
-  csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=783175366&single=true&output=csv",
+  csv: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv",
   tableBody: document.getElementById("tableBodyBonds"),
   rowCount: document.getElementById("rowCountBonds"),
   searchBox: document.getElementById("searchBonds")
 };
+
 
 const stockSheets = [
   {
@@ -221,11 +222,12 @@ function weightToStars(val) {
 }
 
 /* ===== LOAD BONDS TABLE ===== */
+
 async function loadBonds(sheet) {
   const res = await fetch(sheet.csv + "&t=" + Date.now());
   const text = await res.text();
 
-  const rows = text.split("\n").slice(1);
+  const rows = text.split("\n").slice(1); // skip header
   sheet.tableBody.innerHTML = "";
 
   rows.forEach(r => {
@@ -233,27 +235,33 @@ async function loadBonds(sheet) {
     if (!c[0]) return; // skip empty Bond Name
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td>${c[0] || "-"}</td>
-      <td>${c[1] || "-"}</td>
-      <td>${c[2] || "-"}</td>
-      <td>${c[3] || "-"}</td>
-      <td>${c[4] || "-"}</td>
-      <td>${c[5] || "-"}</td>
-      <td>${c[6] || "-"}</td>
+      <td>${c[0] || "-"}</td>  <!-- A: Bond Name -->
+      <td>${c[1] || "-"}</td>  <!-- B: Coupon -->
+      <td>${c[2] || "-"}</td>  <!-- C: Maturity -->
+      <td>${c[3] || "-"}</td>  <!-- D: Rating -->
+      <td>${c[4] || "-"}</td>  <!-- E: Interest Payment -->
+      <td>${c[5] || "-"}</td>  <!-- F: Yield -->
+      <td>${c[6] || "-"}</td>  <!-- G: Price -->
     `;
+
     sheet.tableBody.appendChild(tr);
   });
 
-  sheet.rowCount.innerText = sheet.tableBody.children.length + " rows";
+  sheet.rowCount.innerText =
+    sheet.tableBody.children.length + " rows";
 
   sheet.searchBox.addEventListener("input", () => {
     const q = sheet.searchBox.value.toLowerCase();
     [...sheet.tableBody.rows].forEach(r => {
-      r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+      r.style.display = r.innerText
+        .toLowerCase()
+        .includes(q) ? "" : "none";
     });
   });
 }
+
 
 /* ===== LOAD STOCK SHEETS ===== */
 async function loadStockSheet(sheet) {
