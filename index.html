@@ -5,7 +5,6 @@
 <title>Live Sheet Dashboard</title>
 
 <style>
-/* ===== BASE ===== */
 body {
   margin: 0;
   font-family: system-ui, -apple-system, BlinkMacSystemFont;
@@ -23,6 +22,7 @@ header {
 .container {
   max-width: 1300px;
   margin: 20px auto;
+  background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   padding: 20px;
@@ -57,19 +57,18 @@ table {
 thead th {
   position: sticky;
   top: 0;
+  background: #f8fafc;
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
-  text-align: left;
 }
 
 tbody td {
   padding: 10px;
   border-bottom: 1px solid #eef2f7;
-  white-space: nowrap;
 }
 
 tbody tr:hover {
-  transition: background 0.2s;
+  background: #f1f5f9;
 }
 
 .stars {
@@ -83,64 +82,6 @@ tbody tr:hover {
   color: #64748b;
   margin-top: 10px;
 }
-/* ===== FORCE LEFT ALIGN (HEADERS + VALUES) ===== */
-table th,
-table td {
-  text-align: left !important;
-}
-
-/* ================= SECURED BONDS ================= */
-#bondsContainer {
-  background: linear-gradient(180deg, #f0fdf4, #ffffff);
-  border: 1px solid #bbf7d0;
-}
-#bondsContainer h2 { color: #166534; }
-#bondsContainer thead th {
-  background: #dcfce7;
-  color: #14532d;
-}
-#bondsContainer tbody td:nth-child(4) {
-  background: #ecfdf5;
-  color: #047857;
-  font-weight: 600;
-}
-#bondsContainer tbody tr:hover { background: #d1fae5; }
-
-/* ================= CORE ================= */
-#sheet1Container {
-  background: linear-gradient(180deg, #eff6ff, #ffffff);
-  border: 1px solid #bfdbfe;
-}
-#sheet1Container h2 { color: #1e40af; }
-#sheet1Container thead th {
-  background: #e0f2fe;
-  color: #1e3a8a;
-}
-#sheet1Container tbody tr:hover { background: #dbeafe; }
-
-/* ================= ADDITIONAL ================= */
-#sheet2Container {
-  background: linear-gradient(180deg, #f5f3ff, #ffffff);
-  border: 1px solid #ddd6fe;
-}
-#sheet2Container h2 { color: #5b21b6; }
-#sheet2Container thead th {
-  background: #ede9fe;
-  color: #4c1d95;
-}
-#sheet2Container tbody tr:hover { background: #e9d5ff; }
-
-/* ================= EVERGREEN ================= */
-#evergreenContainer {
-  background: linear-gradient(180deg, #ecfeff, #ffffff);
-  border: 1px solid #99f6e4;
-}
-#evergreenContainer h2 { color: #115e59; }
-#evergreenContainer thead th {
-  background: #ccfbf1;
-  color: #134e4a;
-}
-#evergreenContainer tbody tr:hover { background: #99f6e4; }
 </style>
 </head>
 
@@ -149,11 +90,11 @@ table td {
 <header>📊 Live Sheet Dashboard</header>
 
 <!-- ================= BONDS ================= -->
-<div class="container" id="bondsContainer">
+<div class="container">
 <h2>Secured Bonds</h2>
 <div class="toolbar">
-<input class="search" placeholder="Search Bonds">
-<span class="badge">Live</span>
+<input id="searchBonds" class="search" placeholder="Search Bonds">
+<span id="rowCountBonds" class="badge">0 rows</span>
 </div>
 
 <table>
@@ -168,13 +109,18 @@ table td {
 </div>
 
 <!-- ================= CORE ================= -->
-<div class="container" id="sheet1Container">
+<div class="container">
 <h2>Core Stocks</h2>
+<div class="toolbar">
+<input id="searchCore" class="search" placeholder="Search Core">
+<span id="rowCountCore" class="badge">0 rows</span>
+</div>
+
 <table>
 <thead>
 <tr>
 <th>NSE</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
-<th>Bookvalue</th><th>TGT</th><th>PE</th>
+<th>Book</th><th>TGT</th><th>PE</th>
 <th>Bonus</th><th>Div</th><th>Facevalue</th>
 <th>M-CAL</th><th>D-CAL</th>
 </tr>
@@ -184,14 +130,19 @@ table td {
 </div>
 
 <!-- ================= ADDITIONAL ================= -->
-<div class="container" id="sheet2Container">
+<div class="container">
 <h2>Additional Stocks</h2>
+<div class="toolbar">
+<input id="searchAdd" class="search" placeholder="Search Additional">
+<span id="rowCountAdd" class="badge">0 rows</span>
+</div>
+
 <table>
 <thead>
 <tr>
 <th>NSE</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
-<th>Bookvalue</th><th>TGT</th><th>PE</th>
-<th>Bonus</th><th>Div</th><th>Faceval</th>
+<th>Book</th><th>TGT</th><th>PE</th>
+<th>Bonus</th><th>Div</th><th>Facevalue</th>
 <th>M-CAL</th><th>D-CAL</th>
 </tr>
 </thead>
@@ -200,12 +151,13 @@ table td {
 </div>
 
 <!-- ================= EVERGREEN ================= -->
-<div class="container" id="evergreenContainer">
+<div class="container">
 <h2>Evergreen Stocks</h2>
+
 <table>
 <thead>
 <tr>
-<th>NSE</th><th>DCHG</th><th>CMP</th><th>Book</th>
+<th>NSE</th><th>DCHG</th><th>CMP</th><th>Bookvalue</th>
 <th>PE</th><th>Bonus</th><th>Div</th>
 <th>Facevalue</th><th>M-CAL</th><th>D-CAL</th>
 </tr>
@@ -215,8 +167,9 @@ table td {
 </div>
 
 <script>
+// ===== STAR LOGIC =====
 function weightToStars(v){
-  v=parseInt(v,10);
+  v = parseInt(v,10);
   if(isNaN(v)) return "-";
   if(v<=3) return "⭐";
   if(v<=6) return "⭐⭐";
@@ -225,6 +178,7 @@ function weightToStars(v){
   return "⭐⭐⭐⭐⭐";
 }
 
+// ===== CSV PARSER (for ₹ commas) =====
 function parseCSVLine(line){
   let res=[],cur="",q=false;
   for(let c of line){
@@ -236,22 +190,80 @@ function parseCSVLine(line){
   return res;
 }
 
+// ===== GENERIC STOCK LOADER =====
+async function loadStock(csv, body, map, count){
+  const t = await (await fetch(csv+"&t="+Date.now())).text();
+  const rows = t.split("\n").slice(1);
+  body.innerHTML="";
+  rows.forEach(r=>{
+    if(!r.trim()) return;
+    const c=r.split(",");
+    const tr=document.createElement("tr");
+    tr.innerHTML=map(c);
+    body.appendChild(tr);
+  });
+  if(count) count.innerText=body.children.length+" rows";
+}
+
+// ===== LOAD BONDS =====
 async function loadBonds(){
   const t=await (await fetch(
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t="+Date.now()
 )).text();
+
+  const rows=t.split("\n").slice(1);
   const b=document.getElementById("tableBodyBonds");
   b.innerHTML="";
-  t.split("\n").slice(1).forEach(r=>{
+  rows.forEach(r=>{
     const c=parseCSVLine(r);
     if(!c[0]) return;
-    b.innerHTML+=`<tr>
-    <td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td>
-    <td>${c[3]}</td><td>${c[4]}</td><td>${c[5]}</td>
-    </tr>`;
+    b.innerHTML+=`
+    <tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td>
+    <td>${c[3]}</td><td>${c[4]}</td><td>${c[5]}</td></tr>`;
   });
+  document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
 }
 
+// ===== CORE =====
+loadStock(
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1284854745&single=true&output=csv",
+document.getElementById("tableBodyCore"),
+c=>`
+<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+<td class="stars">${weightToStars(c[5])}</td>
+<td>${c[4]}</td><td>${c[6]}</td><td>${c[7]}</td>
+<td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
+<td>${c[11]}</td><td>${c[12]}</td>
+`,
+document.getElementById("rowCountCore")
+);
+
+// ===== ADDITIONAL =====
+loadStock(
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=255801000&single=true&output=csv",
+document.getElementById("tableBodyAdd"),
+c=>`
+<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+<td class="stars">${weightToStars(c[5])}</td>
+<td>${c[4]}</td><td>${c[6]}</td><td>${c[7]}</td>
+<td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
+<td>${c[11]}</td><td>${c[12]}</td>
+`,
+document.getElementById("rowCountAdd")
+);
+
+// ===== EVERGREEN =====
+loadStock(
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=492196644&single=true&output=csv",
+document.getElementById("tableBodyEver"),
+c=>`
+<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+<td>${c[4]}</td><td>${c[5]}</td><td>${c[6]}</td>
+<td>${c[7]}</td><td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
+`
+);
+
+// ===== INIT =====
 loadBonds();
 setInterval(loadBonds,1800000);
 </script>
