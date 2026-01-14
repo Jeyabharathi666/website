@@ -110,7 +110,7 @@
 
 <!-- ===== BONDS TABLE ===== -->
 <div class="container" id="bondsContainer">
-  <h2>Bonds</h2>
+  <h2>Secured Bonds</h2>
   <div class="toolbar">
     <input id="searchBonds" class="search" placeholder="🔍 Search Bonds..." />
     <span id="rowCountBonds" class="badge">0 rows</span>
@@ -124,7 +124,7 @@
     <th>Int Pay</th>
     <th>YTM</th>
     <th>Price</th>
-    <th>Security</th>
+    
   </tr>
 </thead>
 
@@ -223,46 +223,59 @@ function weightToStars(val) {
 }
 
 /* ===== LOAD BONDS TABLE ===== */
+/* ===== CSV PARSER (FIXES ₹ AND COMMAS) ===== */
+function parseCSVLine(line) {
+  const result = [];
+  let current = "";
+  let insideQuotes = false;
+
+  for (let i = 0; i < line.length; i++) {
+    const char = line[i];
+
+    if (char === '"') {
+      insideQuotes = !insideQuotes;
+    } else if (char === "," && !insideQuotes) {
+      result.push(current.trim());
+      current = "";
+    } else {
+      current += char;
+    }
+  }
+
+  result.push(current.trim());
+  return result;
+}
 
 async function loadBonds(sheet) {
   const res = await fetch(sheet.csv + "&t=" + Date.now());
   const text = await res.text();
 
-  const rows = text.split("\n").slice(1); // skip header
+  const rows = text.split("\n").slice(1);
   sheet.tableBody.innerHTML = "";
 
   rows.forEach(r => {
-    const c = r.split(",");
-    if (!c[0]) return; // skip empty Bond Name
+    if (!r.trim()) return;
+
+    const c = parseCSVLine(r);
+    if (!c[0]) return;
 
     const tr = document.createElement("tr");
-
     tr.innerHTML = `
-  <td>${c[0] || "-"}</td>  <!-- Bond Name -->
-  <td>${c[1] || "-"}</td>  <!-- Rating -->
-  <td>${c[2] || "-"}</td>  <!-- Maturity -->
-  <td>${c[3] || "-"}</td>  <!-- Int Pay -->
-  <td>${c[4] || "-"}</td>  <!-- YTM -->
-  <td>${c[5] || "-"}</td>  <!-- Price -->
-  <td>${c[6] || "-"}</td>  <!-- Security -->
-`;
-
+      <td>${c[0] || "-"}</td>
+      <td>${c[1] || "-"}</td>
+      <td>${c[2] || "-"}</td>
+      <td>${c[3] || "-"}</td>
+      <td>${c[4] || "-"}</td>
+      <td>${c[5] || "-"}</td>
+    `;
 
     sheet.tableBody.appendChild(tr);
   });
 
   sheet.rowCount.innerText =
     sheet.tableBody.children.length + " rows";
-
-  sheet.searchBox.addEventListener("input", () => {
-    const q = sheet.searchBox.value.toLowerCase();
-    [...sheet.tableBody.rows].forEach(r => {
-      r.style.display = r.innerText
-        .toLowerCase()
-        .includes(q) ? "" : "none";
-    });
-  });
 }
+
 
 
 /* ===== LOAD STOCK SHEETS ===== */
