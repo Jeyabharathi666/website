@@ -22,10 +22,37 @@ header {
 .container {
   max-width: 1300px;
   margin: 20px auto;
-  background: #fff;
   border-radius: 12px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.08);
   padding: 20px;
+}
+
+/* ---------- COMMON ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table th,
+table td {
+  text-align: left;
+  white-space: nowrap;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  padding: 12px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody td {
+  padding: 10px;
+  border-bottom: 1px solid #eef2f7;
+}
+
+tbody tr:hover {
+  transition: background 0.2s;
 }
 
 .toolbar {
@@ -49,39 +76,94 @@ header {
   font-size: 13px;
 }
 
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead th {
-  position: sticky;
-  top: 0;
-  background: #f8fafc;
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-tbody td {
-  padding: 10px;
-  border-bottom: 1px solid #eef2f7;
-}
-
-tbody tr:hover {
-  background: #f1f5f9;
-}
-
 .stars {
   color: #facc15;
   font-size: 16px;
 }
 
-.footer {
-  text-align: center;
-  font-size: 12px;
-  color: #64748b;
-  margin-top: 10px;
+/* ================= SECURED BONDS ================= */
+.container:nth-of-type(1) {
+  background: linear-gradient(180deg, #f0fdf4, #ffffff);
+  border: 1px solid #bbf7d0;
 }
+
+.container:nth-of-type(1) h2 {
+  color: #166534;
+}
+
+.container:nth-of-type(1) thead th {
+  background: #dcfce7;
+  color: #14532d;
+}
+
+/* Interest Pay column */
+.container:nth-of-type(1) tbody td:nth-child(4) {
+  background: #ecfdf5;
+  color: #047857;
+  font-weight: 600;
+}
+
+.container:nth-of-type(1) tbody tr:hover {
+  background: #d1fae5;
+}
+
+/* ================= CORE STOCKS ================= */
+.container:nth-of-type(2) {
+  background: linear-gradient(180deg, #eff6ff, #ffffff);
+  border: 1px solid #bfdbfe;
+}
+
+.container:nth-of-type(2) h2 {
+  color: #1e40af;
+}
+
+.container:nth-of-type(2) thead th {
+  background: #e0f2fe;
+  color: #1e3a8a;
+}
+
+.container:nth-of-type(2) tbody tr:hover {
+  background: #dbeafe;
+}
+
+/* ================= ADDITIONAL STOCKS ================= */
+.container:nth-of-type(3) {
+  background: linear-gradient(180deg, #f5f3ff, #ffffff);
+  border: 1px solid #ddd6fe;
+}
+
+.container:nth-of-type(3) h2 {
+  color: #5b21b6;
+}
+
+.container:nth-of-type(3) thead th {
+  background: #ede9fe;
+  color: #4c1d95;
+}
+
+.container:nth-of-type(3) tbody tr:hover {
+  background: #e9d5ff;
+}
+
+/* ================= EVERGREEN ================= */
+.container:nth-of-type(4) {
+  background: linear-gradient(180deg, #ecfeff, #ffffff);
+  border: 1px solid #99f6e4;
+}
+
+.container:nth-of-type(4) h2 {
+  color: #115e59;
+}
+
+.container:nth-of-type(4) thead th {
+  background: #ccfbf1;
+  color: #134e4a;
+}
+
+.container:nth-of-type(4) tbody tr:hover {
+  background: #99f6e4;
+}
+
 </style>
 </head>
 
