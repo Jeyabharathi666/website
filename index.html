@@ -117,16 +117,17 @@
   </div>
   <table>
     <thead>
-      <tr>
-        <th>Bond Name</th>
-        <th>Coupon</th>
-        <th>Maturity</th>
-        <th>Rating</th>
-        <th>Interest Payment</th>
-        <th>Yield</th>
-        <th>Price</th>
-      </tr>
-    </thead>
+  <tr>
+    <th>Bond Name</th>
+    <th>Rating</th>
+    <th>Maturity</th>
+    <th>Int Pay</th>
+    <th>YTM</th>
+    <th>Price</th>
+    <th>Security</th>
+  </tr>
+</thead>
+
     <tbody id="tableBodyBonds"></tbody>
   </table>
   <div class="footer">Auto-refresh every 30 min · Powered by Google Sheets</div>
@@ -237,14 +238,15 @@ async function loadBonds(sheet) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${c[0] || "-"}</td>  <!-- A: Bond Name -->
-      <td>${c[1] || "-"}</td>  <!-- B: Coupon -->
-      <td>${c[2] || "-"}</td>  <!-- C: Maturity -->
-      <td>${c[3] || "-"}</td>  <!-- D: Rating -->
-      <td>${c[4] || "-"}</td>  <!-- E: Interest Payment -->
-      <td>${c[5] || "-"}</td>  <!-- F: Yield -->
-      <td>${c[6] || "-"}</td>  <!-- G: Price -->
-    `;
+  <td>${c[0] || "-"}</td>  <!-- Bond Name -->
+  <td>${c[1] || "-"}</td>  <!-- Rating -->
+  <td>${c[2] || "-"}</td>  <!-- Maturity -->
+  <td>${c[3] || "-"}</td>  <!-- Int Pay -->
+  <td>${c[4] || "-"}</td>  <!-- YTM -->
+  <td>${c[5] || "-"}</td>  <!-- Price -->
+  <td>${c[6] || "-"}</td>  <!-- Security -->
+`;
+
 
     sheet.tableBody.appendChild(tr);
   });
