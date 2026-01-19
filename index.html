@@ -125,6 +125,25 @@ tbody tr:hover {
 .container:nth-of-type(2) tbody tr:hover {
   background: #dbeafe;
 }
+  /* ================= MULTIBAG ================= */
+.container:nth-of-type(5) {
+  background: linear-gradient(180deg, #fff7ed, #ffffff);
+  border: 1px solid #fed7aa;
+}
+
+.container:nth-of-type(5) h2 {
+  color: #9a3412;
+}
+
+.container:nth-of-type(5) thead th {
+  background: #ffedd5;
+  color: #7c2d12;
+}
+
+.container:nth-of-type(5) tbody tr:hover {
+  background: #fed7aa;
+}
+
 
 /* ================= ADDITIONAL STOCKS ================= */
 .container:nth-of-type(3) {
@@ -247,6 +266,27 @@ tbody tr:hover {
 <tbody id="tableBodyEver"></tbody>
 </table>
 </div>
+<!-- ================= MULTIBAG ================= -->
+<div class="container">
+  <h2>Multibag Stocks</h2>
+
+  <div class="toolbar">
+    <input id="searchMulti" class="search" placeholder="Search Multibag">
+    <span id="rowCountMulti" class="badge">0 rows</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>NSE</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
+        <th>Bookvalue</th><th>TGT</th><th>PE</th>
+        <th>Bonus</th><th>Div</th><th>Facevalue</th>
+        <th>M-CAL</th><th>D-CAL</th>
+      </tr>
+    </thead>
+    <tbody id="tableBodyMulti"></tbody>
+  </table>
+</div>
 
 <script>
 // ===== STAR LOGIC =====
@@ -343,6 +383,19 @@ c=>`
 <td>${c[4]}</td><td>${c[5]}</td><td>${c[6]}</td>
 <td>${c[7]}</td><td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
 `
+);
+//===== MULTIBAG ===== 
+loadStock(
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=2100565653&single=true&output=csv",
+  document.getElementById("tableBodyMulti"),
+  c => `
+    <td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+    <td class="stars">${weightToStars(c[5])}</td>
+    <td>${c[4]}</td><td>${c[6]}</td><td>${c[7]}</td>
+    <td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
+    <td>${c[11]}</td><td>${c[12]}</td>
+  `,
+  document.getElementById("rowCountMulti")
 );
 
 // ===== INIT =====
