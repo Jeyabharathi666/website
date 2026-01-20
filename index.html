@@ -220,7 +220,7 @@ tbody tr:hover {
 <table>
 <thead>
 <tr>
-<th>NSE</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
+<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
 <th>Bookvalue</th><th>TGT</th><th>PE</th>
 <th>Bonus</th><th>Div</th><th>Facevalue</th>
 <th>M-CAL</th><th>D-CAL</th>
@@ -241,7 +241,7 @@ tbody tr:hover {
 <table>
 <thead>
 <tr>
-<th>NSE</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
+<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
 <th>Bookvalue</th><th>TGT</th><th>PE</th>
 <th>Bonus</th><th>Div</th><th>Facevalue</th>
 <th>M-CAL</th><th>D-CAL</th>
@@ -258,7 +258,7 @@ tbody tr:hover {
 <table>
 <thead>
 <tr>
-<th>NSE</th><th>DCHG</th><th>CMP</th><th>Bookvalue</th>
+<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Bookvalue</th>
 <th>PE</th><th>Bonus</th><th>Div</th>
 <th>Facevalue</th><th>M-CAL</th><th>D-CAL</th>
 </tr>
@@ -280,6 +280,7 @@ tbody tr:hover {
   <tr>
     <th>Stock Name</th>
     <th>NSE</th>
+    <th>SECTOR</th>
     <th>DCHG</th>
     <th>CMP</th>
     <th>Book Value</th>
@@ -355,54 +356,84 @@ loadStock(
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1284854745&single=true&output=csv",
 document.getElementById("tableBodyCore"),
 c=>`
-<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+<td>${c[1]}</td>   <!-- NSE -->
+<td>${c[2]}</td>   <!-- SECTOR -->
+<td>${c[3]}</td>   <!-- DCHG -->
+<td>${c[4]}</td>   <!-- CMP -->
 <td class="stars">${weightToStars(c[5])}</td>
-<td>${c[4]}</td><td>${c[6]}</td><td>${c[7]}</td>
-<td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
-<td>${c[11]}</td><td>${c[12]}</td>
+<td>${c[6]}</td>
+<td>${c[7]}</td>
+<td>${c[8]}</td>
+<td>${c[9]}</td>
+<td>${c[10]}</td>
+<td>${c[11]}</td>
+<td>${c[12]}</td>
+<td>${c[13]}</td>
 `,
 document.getElementById("rowCountCore")
 );
+
 
 // ===== ADDITIONAL =====
 loadStock(
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=255801000&single=true&output=csv",
 document.getElementById("tableBodyAdd"),
 c=>`
-<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
+<td>${c[1]}</td>   <!-- NSE -->
+<td>${c[2]}</td>   <!-- SECTOR -->
+<td>${c[3]}</td>
+<td>${c[4]}</td>
 <td class="stars">${weightToStars(c[5])}</td>
-<td>${c[4]}</td><td>${c[6]}</td><td>${c[7]}</td>
-<td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
-<td>${c[11]}</td><td>${c[12]}</td>
+<td>${c[6]}</td>
+<td>${c[7]}</td>
+<td>${c[8]}</td>
+<td>${c[9]}</td>
+<td>${c[10]}</td>
+<td>${c[11]}</td>
+<td>${c[12]}</td>
+<td>${c[13]}</td>
 `,
 document.getElementById("rowCountAdd")
 );
+
 
 // ===== EVERGREEN =====
 loadStock(
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=492196644&single=true&output=csv",
 document.getElementById("tableBodyEver"),
 c=>`
-<td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td>
-<td>${c[4]}</td><td>${c[5]}</td><td>${c[6]}</td>
-<td>${c[7]}</td><td>${c[8]}</td><td>${c[9]}</td><td>${c[10]}</td>
+<td>${c[1]}</td>   <!-- NSE -->
+<td>${c[2]}</td>   <!-- SECTOR -->
+<td>${c[3]}</td>
+<td>${c[4]}</td>
+<td>${c[5]}</td>
+<td>${c[6]}</td>
+<td>${c[7]}</td>
+<td>${c[8]}</td>
+<td>${c[9]}</td>
+<td>${c[10]}</td>
+<td>${c[11]}</td>
 `
 );
+
+
 //===== MULTIBAG ===== 
 loadStock(
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=2100565653&single=true&output=csv",
-  document.getElementById("tableBodyMulti"),
-  c => `
-    <td>${c[0]}</td>
-    <td>${c[1]}</td>
-    <td>${c[2]}</td>
-    <td>${c[3]}</td>
-    <td>${c[4]}</td>
-    <td>${c[5]}</td>
-    <td>${c[6]}</td>
-  `,
-  document.getElementById("rowCountMulti")
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=2100565653&single=true&output=csv",
+document.getElementById("tableBodyMulti"),
+c=>`
+<td>${c[0]}</td>  <!-- Stock Name -->
+<td>${c[1]}</td>  <!-- NSE -->
+<td>${c[2]}</td>  <!-- SECTOR -->
+<td>${c[3]}</td>  <!-- DCHG -->
+<td>${c[4]}</td>  <!-- CMP -->
+<td>${c[5]}</td>  <!-- Book Value -->
+<td>${c[6]}</td>  <!-- PE -->
+<td>${c[7]}</td>  <!-- M-CAL -->
+`,
+document.getElementById("rowCountMulti")
 );
+
 
 
 // ===== INIT =====
