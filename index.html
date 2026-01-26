@@ -408,34 +408,38 @@ async function loadBonds(){
   });
   document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
 }
-// ---------- LOAD TAX FREE (ROW 4+, S T V) ----------
+// ---------- LOAD TAX FREE (ROW 4+, R T U V) ----------
 async function loadTaxFreeBonds(){
   const t = await (await fetch(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t="+Date.now()
-)).text();
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t=" + Date.now()
+  )).text();
 
-  const rows = t.split("\n").slice(3); // start from row 4
+  // Start from ROW 4 (skip header + first 3 rows)
+  const rows = t.split("\n").slice(3);
+
   const body = document.getElementById("tableBodyTax");
-  body.innerHTML="";
+  body.innerHTML = "";
 
-  rows.forEach(r=>{
-    if(!r.trim()) return;
+  rows.forEach(r => {
+    if (!r.trim()) return;
+
     const c = parseCSVLine(r);
 
-    const company = c[17];                // r
-    const sold = extractMinPrice(c[19]);    // T
-    const YTM = c[20]; U
+    const company  = c[17];                   // R
+    const amount   = extractMinPrice(c[19]);  // T
+    const ytm      = c[20];                   // U
     const maturity = tenureToMonthYear(c[21]); // V
 
-    if(!company) return;
+    if (!company) return;
 
     body.innerHTML += `
-<tr>
-<td>${company}</td>
-<td>${sold}</td>
-<td>${YTM}</td>
-<td>${maturity}</td>
-</tr>`;
+      <tr>
+        <td>${company}</td>
+        <td>${amount}</td>
+        <td>${ytm}</td>
+        <td>${maturity}</td>
+      </tr>
+    `;
   });
 
   document.getElementById("rowCountTax").innerText =
