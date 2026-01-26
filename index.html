@@ -402,7 +402,7 @@ async function loadTaxFreeBonds(){
 "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t="+Date.now()
 )).text();
 
-  const rows = t.split("\n").slice(4); // start from row 4
+  const rows = t.split("\n").slice(3); // start from row 4
   const body = document.getElementById("tableBodyTax");
   body.innerHTML="";
 
