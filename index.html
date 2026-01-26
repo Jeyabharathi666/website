@@ -207,24 +207,21 @@ tbody tr:hover {
 </thead>
 <tbody id="tableBodyBonds"></tbody>
 </table>
-</div>
-<!-- ================= TAX BENEFIT ================= -->
+<!-- ================= TAX FREE ================= -->
 <div class="container">
-  <h2>Ranked Tax Free Bonds</h2>
-
-  <div class="toolbar">
-    <input id="searchTax" class="search" placeholder="Search Tax Free Bonds">
-    <span id="rowCountTax" class="badge">0 rows</span>
-  </div>
-
-  <table>
-    <thead>
-      <tr>
-        <th>Company</th>
-      </tr>
-    </thead>
-    <tbody id="tableBodyTax"></tbody>
-  </table>
+<h2>Ranked Tax Free Bonds</h2>
+<table>
+<thead>
+<tr>
+<th>Company</th>
+<th>Sold (₹)</th>
+<th>YTM</th>
+<th>Maturity</th>
+</tr>
+</thead>
+<tbody id="tableBodyTax"></tbody>
+</table>
+<span id="rowCountTax" class="badge">0 rows</span>
 </div>
 
 <!-- ================= CORE ================= -->
@@ -334,6 +331,37 @@ function parseCSVLine(line){
   res.push(cur.trim());
   return res;
 }
+// ---------- SOLD → NUMBER ----------
+function extractNumber(val){
+  if(!val) return "";
+  val = val.toLowerCase();
+  if(val.includes("lakh")){
+    const n = parseFloat(val.replace(/[^0-9.]/g,""));
+    return Math.round(n * 100000);
+  }
+  return val.replace(/[^0-9]/g,"");
+}
+
+// ---------- TENURE → MONTH + YEAR ----------
+function tenureToMonthYear(val){
+  if(!val) return "";
+  const months = parseInt(val.replace(/\D/g,""),10);
+  if(isNaN(months)) return "";
+
+  const now = new Date();               // built-in current date
+  const baseYear = now.getFullYear();
+  const baseMonth = now.getMonth();     // Jan = 0
+
+  const total = baseMonth + months;
+  const year = baseYear + Math.floor(total / 12);
+  const monthIndex = total % 12;
+
+  const names = ["Jan","Feb","Mar","Apr","May","Jun",
+                 "Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  return `${names[monthIndex]} ${year}`;
+}
+
 
 // ===== GENERIC STOCK LOADER =====
 async function loadStock(csv, body, map, count){
@@ -368,25 +396,34 @@ async function loadBonds(){
   });
   document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
 }
-// TAX BENEFIT
+// ---------- LOAD TAX FREE (ROW 4+, S T V) ----------
 async function loadTaxFreeBonds(){
   const t = await (await fetch(
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t=" + Date.now()
-  )).text();
+"https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t="+Date.now()
+)).text();
 
-  const rows = t.split("\n").slice(3);
+  const rows = t.split("\n").slice(4); // start from row 4
   const body = document.getElementById("tableBodyTax");
-  body.innerHTML = "";
+  body.innerHTML="";
 
-  rows.forEach(r => {
+  rows.forEach(r=>{
     if(!r.trim()) return;
     const c = parseCSVLine(r);
 
-    // Column S → index 17 (0-based)
-    const company = c[17];
+    const company = c[17];                // S
+    const sold = extractNumber(c[19]);    // T
+    const YTM = c[17]; 
+    const maturity = tenureToMonthYear(c[21]); // V
+
     if(!company) return;
 
-    body.innerHTML += `<tr><td>${company}</td></tr>`;
+    body.innerHTML += `
+<tr>
+<td>${company}</td>
+<td>${sold}</td>
+<td>${YTM}</td>
+<td>${maturity}</td>
+</tr>`;
   });
 
   document.getElementById("rowCountTax").innerText =
