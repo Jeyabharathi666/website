@@ -208,6 +208,24 @@ tbody tr:hover {
 <tbody id="tableBodyBonds"></tbody>
 </table>
 </div>
+<!-- ================= TAX BENEFIT ================= -->
+<div class="container">
+  <h2>Ranked Tax Free Bonds</h2>
+
+  <div class="toolbar">
+    <input id="searchTax" class="search" placeholder="Search Tax Free Bonds">
+    <span id="rowCountTax" class="badge">0 rows</span>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Company</th>
+      </tr>
+    </thead>
+    <tbody id="tableBodyTax"></tbody>
+  </table>
+</div>
 
 <!-- ================= CORE ================= -->
 <div class="container">
@@ -350,6 +368,30 @@ async function loadBonds(){
   });
   document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
 }
+// TAX BENEFIT
+async function loadTaxFreeBonds(){
+  const t = await (await fetch(
+    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t=" + Date.now()
+  )).text();
+
+  const rows = t.split("\n").slice(1);
+  const body = document.getElementById("tableBodyTax");
+  body.innerHTML = "";
+
+  rows.forEach(r => {
+    if(!r.trim()) return;
+    const c = parseCSVLine(r);
+
+    // Column S → index 18 (0-based)
+    const company = c[18];
+    if(!company) return;
+
+    body.innerHTML += `<tr><td>${company}</td></tr>`;
+  });
+
+  document.getElementById("rowCountTax").innerText =
+    body.children.length + " rows";
+}
 
 // ===== CORE =====
 loadStock(
@@ -438,6 +480,9 @@ document.getElementById("rowCountMulti")
 
 // ===== INIT =====
 loadBonds();
+loadTaxFreeBonds();
+setInterval(loadTaxFreeBonds, 1800000);
+
 setInterval(loadBonds,1800000);
 </script>
 
