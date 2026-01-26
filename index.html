@@ -382,8 +382,8 @@ async function loadTaxFreeBonds(){
     if(!r.trim()) return;
     const c = parseCSVLine(r);
 
-    // Column S → index 18 (0-based)
-    const company = c[18];
+    // Column S → index 17 (0-based)
+    const company = c[17];
     if(!company) return;
 
     body.innerHTML += `<tr><td>${company}</td></tr>`;
