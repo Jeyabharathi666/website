@@ -423,8 +423,8 @@ async function loadTaxFreeBonds(){
     const c = parseCSVLine(r);
 
     const company = c[17];                // S
-    const sold = extractNumber(c[19]);    // T
-    const YTM = c[17]; 
+    const sold = extractMinPrice(c[19]);    // T
+    const YTM = c[20]; 
     const maturity = tenureToMonthYear(c[21]); // V
 
     if(!company) return;
