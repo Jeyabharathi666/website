@@ -331,16 +331,28 @@ function parseCSVLine(line){
   res.push(cur.trim());
   return res;
 }
-// ---------- SOLD → NUMBER ----------
-function extractNumber(val){
+function extractMinPrice(val){
   if(!val) return "";
+
   val = val.toLowerCase();
+
+  // Handle lakh
   if(val.includes("lakh")){
-    const n = parseFloat(val.replace(/[^0-9.]/g,""));
-    return Math.round(n * 100000);
+    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return isNaN(num) ? "" : Math.round(num * 100000);
   }
-  return val.replace(/[^0-9]/g,"");
+
+  // Handle k (thousand)
+  if(val.includes("k")){
+    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
+    return isNaN(num) ? "" : Math.round(num * 1000);
+  }
+
+  // Handle plain numbers (₹75,000 etc.)
+  const cleaned = val.replace(/[^0-9.]/g, "");
+  return cleaned ? Number(cleaned) : "";
 }
+
 
 // ---------- TENURE → MONTH + YEAR ----------
 function tenureToMonthYear(val){
