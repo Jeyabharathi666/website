@@ -362,7 +362,7 @@ function tenureToMonthYear(val){
 
   const now = new Date();               // built-in current date
   const baseYear = now.getFullYear();
-  const baseMonth = now.getMonth();     // Jan = 0
+  const baseMonth = now.getMonth()+1;     // Jan = 0
 
   const total = baseMonth + months;
   const year = baseYear + Math.floor(total / 12);
