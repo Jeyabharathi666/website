@@ -408,15 +408,13 @@ async function loadBonds(){
   });
   document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
 }
-// ---------- LOAD TAX FREE (ROW 4+, R T U V) ----------
 async function loadTaxFreeBonds(){
   const t = await (await fetch(
     "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t=" + Date.now()
   )).text();
 
-  // Start from ROW 4 (skip header + first 3 rows)
+  // Start from row 4 (header + 3 blank rows skipped)
   const rows = t.split("\n").slice(3);
-
   const body = document.getElementById("tableBodyTax");
   body.innerHTML = "";
 
@@ -426,16 +424,17 @@ async function loadTaxFreeBonds(){
     const c = parseCSVLine(r);
 
     const company  = c[17];                   // R
-    const amount   = extractMinPrice(c[19]);  // T
-    const ytm      = c[20];                   // U
-    const maturity = tenureToMonthYear(c[21]); // V
+    const sold     = extractMinPrice(c[19]);  // T → Min. ₹1 lakh → 100000
+    const ytm      = c[20];                   // U → 11.15%
+    const maturity = tenureToMonthYear(c[21]); // V → 22 months → Oct 2028
+    const interest = c[22];                   // W → Monthly
 
     if (!company) return;
 
     body.innerHTML += `
       <tr>
         <td>${company}</td>
-        <td>${amount}</td>
+        <td>${sold}</td>
         <td>${ytm}</td>
         <td>${maturity}</td>
       </tr>
