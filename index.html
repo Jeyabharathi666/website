@@ -471,25 +471,25 @@ document.getElementById("rowCountCore")
 
 // ===== ADDITIONAL =====
 loadStock(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=255801000&single=true&output=csv",
-document.getElementById("tableBodyAdd"),
-c=>`
-<td>${c[1]}</td>   <!-- NSE -->
-<td>${c[2]}</td>   <!-- SECTOR -->
-<td>${c[3]}</td>   <!-- DCHG -->
-<td>${c[4]}</td>   <!-- CMP -->
-<td class="stars">${weightToStars(c[6])}</td> <!-- analyse -->
-<td>${c[5]}</td>
-<td>${c[7]}</td>
-<td>${c[8]}</td>
-<td>${c[9]}</td>
-<td>${c[10]}</td>
-<td>${c[11]}</td>
-<td>${c[12]}</td>
-<td>${c[13]}</td>
-`,
-document.getElementById("rowCountAdd")
+  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1284854745&single=true&output=csv",
+  document.getElementById("tableBodyCore"),
+  c => `
+    <td>${c[0]}</td>   <!-- NSE -->
+    <td>${c[1]}</td>   <!-- SECTOR -->
+    <td>${c[2]}</td>   <!-- DCHG -->
+    <td>${c[3]}</td>   <!-- CMP -->
+    <td class="stars">${weightToStars(Number(c[4]) || 0)}</td> <!-- Anly -->
+    <td>${c[7]}</td>   <!-- Bookvalue -->
+    <td>${c[5]}</td>   <!-- TGT (UH) -->
+    <td>${c[6]}</td>   <!-- PE -->
+    <td>${c[9]}</td>   <!-- Bonus -->
+    <td>${c[8]}</td>   <!-- Div -->
+    <td>${c[10]}</td>  <!-- M-CAL -->
+    <td>${c[11]}</td>  <!-- D-CAL -->
+  `,
+  document.getElementById("rowCountCore")
 );
+
 
 
 // ===== EVERGREEN =====
