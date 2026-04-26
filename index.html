@@ -333,7 +333,9 @@ function weightToStars(v){
   if(v<=12) return "⭐⭐⭐⭐";
   return "⭐⭐⭐⭐⭐";
 }
-
+function goToDashboard() {
+  window.location.href = "https://nifty-sad.streamlit.app/";
+}
 // ===== CSV PARSER (for ₹ commas) =====
 function parseCSVLine(line){
   let res=[],cur="",q=false;
