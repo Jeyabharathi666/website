@@ -1,576 +1,535 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<title>Live Sheet Dashboard</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock Screener</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
 <style>
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont;
-  background: #f5f7fb;
+/* ============ GLOBAL ============ */
+*{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --bg:#f4f7fb;
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --text:#111827;
+  --text2:#6b7280;
+  --primary:#2563eb;
+  --green:#16a34a;
+  --red:#dc2626;
+  --gold:#f4b400;
+  --shadow:0 10px 25px rgba(0,0,0,.06);
 }
 
-header {
-  background: linear-gradient(90deg, #0f172a, #020617);
-  color: #fff;
-  padding: 16px 28px;
-  font-size: 20px;
-  font-weight: 600;
+body{
+  background:var(--bg);
+  font-family:'Inter',sans-serif;
+  color:var(--text);
 }
 
-.container {
-  max-width: 1300px;
-  margin: 20px auto;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-  padding: 20px;
+body.dark{
+  --bg:#0f172a;
+  --card:#1e293b;
+  --border:#334155;
+  --text:#f8fafc;
+  --text2:#94a3b8;
 }
 
-/* ---------- COMMON ---------- */
-table {
-  width: 100%;
-  border-collapse: collapse;
+/* ============ HEADER ============ */
+header{
+  height:72px;
+  background:var(--card);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 32px;
+  position:sticky;
+  top:0;
+  z-index:100;
+  border-bottom:1px solid var(--border);
 }
 
-table th,
-table td {
-  text-align: left;
-  white-space: nowrap;
+.logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:21px;
+  font-weight:700;
+  color:var(--primary);
 }
 
-thead th {
-  position: sticky;
-  top: 0;
-  padding: 12px;
-  border-bottom: 1px solid #e5e7eb;
+.header-right{display:flex;align-items:center;gap:14px;}
+
+.search-box{
+  width:300px;
+  height:42px;
+  background:var(--bg);
+  border:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  border-radius:10px;
+  padding:0 14px;
+}
+.search-box i{color:var(--text2);font-size:13px;}
+.search-box input{
+  flex:1;border:none;background:none;outline:none;
+  font-size:14px;color:var(--text);font-family:inherit;
 }
 
-tbody td {
-  padding: 10px;
-  border-bottom: 1px solid #eef2f7;
+#darkToggle{
+  width:42px;height:42px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text2);cursor:pointer;font-size:15px;
 }
 
-tbody tr:hover {
-  transition: background 0.2s;
+/* ============ TOOLBAR ============ */
+.toolbar{
+  display:flex;gap:10px;align-items:center;padding:18px 32px;flex-wrap:wrap;
 }
 
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 12px;
+.filter{
+  background:var(--card);
+  border:1px solid var(--border);
+  color:var(--text2);
+  padding:9px 16px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+  transition:.2s;
+}
+.filter:hover{border-color:var(--primary);color:var(--primary);}
+.filter.active{background:var(--primary);border-color:var(--primary);color:white;}
+
+#refreshBtn{
+  margin-left:auto;
+  border:none;
+  background:var(--green);
+  color:white;
+  padding:10px 18px;
+  border-radius:10px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:13px;
+  display:flex;align-items:center;gap:8px;
+}
+#refreshBtn:hover{filter:brightness(1.07);}
+#refreshBtn.spin i{animation:spin .7s linear infinite;}
+
+.result-count{
+  font-size:13px;color:var(--text2);padding:0 32px 4px;
 }
 
-.search {
-  width: 260px;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #d1d5db;
+/* ============ TABLE ============ */
+.table-container{
+  margin:0 32px 40px;
+  background:var(--card);
+  border-radius:14px;
+  overflow:auto;
+  box-shadow:var(--shadow);
+  border:1px solid var(--border);
 }
 
-.badge {
-  background: #2563eb;
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 999px;
-  font-size: 13px;
+table{width:100%;border-collapse:collapse;}
+
+thead{background:var(--bg);position:sticky;top:0;z-index:5;}
+
+th{
+  padding:14px 16px;
+  text-align:left;
+  font-size:11.5px;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  color:var(--text2);
+  border-bottom:1px solid var(--border);
+  cursor:pointer;
+  white-space:nowrap;
+}
+th:hover{color:var(--primary);}
+th .arrow{opacity:0;font-size:9px;margin-left:3px;}
+th.sorted .arrow{opacity:1;color:var(--primary);}
+
+td{
+  padding:12px 16px;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+  vertical-align:middle;
 }
 
-.stars {
-  color: #facc15;
-  font-size: 16px;
+tbody tr{cursor:pointer;transition:.15s;}
+tbody tr:hover td{background:rgba(37,99,235,.04);}
+tbody tr:last-child td{border-bottom:none;}
+
+.stock-name{font-weight:700;font-size:14.5px;}
+.stock-symbol{font-size:12px;color:var(--text2);margin-top:2px;}
+
+.badge{
+  display:inline-block;padding:5px 11px;border-radius:20px;
+  font-size:12px;font-weight:600;
+}
+.green{background:#dcfce7;color:#15803d;}
+.red{background:#fee2e2;color:#b91c1c;}
+.category-badge{background:#eef2ff;color:#4338ca;}
+
+.stars{color:var(--gold);font-size:16px;letter-spacing:2px;white-space:nowrap;}
+.stars .empty{color:#e5e7eb;}
+body.dark .stars .empty{color:#334155;}
+
+.trend-cell svg{display:block;}
+
+/* ============ LOADING / EMPTY ============ */
+.loading, .empty-row{
+  display:flex;justify-content:center;align-items:center;gap:14px;
+  padding:50px;color:var(--text2);font-size:14px;
+}
+.loader{
+  width:22px;height:22px;border:3px solid var(--border);
+  border-top:3px solid var(--primary);border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ============ MODAL ============ */
+.modal{
+  position:fixed;inset:0;background:rgba(15,23,42,.55);
+  backdrop-filter:blur(4px);display:none;justify-content:center;
+  align-items:center;z-index:9999;
+}
+.modal.show{display:flex;}
+.modal-content{
+  width:92%;max-width:420px;background:var(--card);border-radius:16px;
+  overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.25);
+}
+.modal-header{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:18px 22px;border-bottom:1px solid var(--border);
+}
+.modal-header h2{font-size:18px;font-weight:700;}
+#closeModal{border:none;background:none;font-size:20px;cursor:pointer;color:var(--text2);}
+.modal-body{padding:20px 22px;}
+.modal-body .trend-wrap{display:flex;justify-content:center;margin-bottom:14px;}
+.detail{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:11px 0;border-bottom:1px solid var(--border);font-size:13.5px;
+}
+.detail:last-child{border-bottom:none;}
+.detail label{color:var(--text2);font-weight:600;}
+.detail span{font-weight:700;}
+
+/* ============ FOOTER ============ */
+footer{
+  display:flex;justify-content:space-between;padding:16px 32px 32px;
+  color:var(--text2);font-size:12.5px;flex-wrap:wrap;gap:8px;
 }
 
-/* ================= SECURED BONDS ================= */
-.container:nth-of-type(1) {
-  background: linear-gradient(180deg, #f0fdf4, #ffffff);
-  border: 1px solid #bbf7d0;
+/* ============ RESPONSIVE ============ */
+@media(max-width:760px){
+  header{flex-direction:column;height:auto;padding:16px;gap:12px;}
+  .header-right{width:100%;}
+  .search-box{width:100%;}
+  .toolbar{padding:14px 16px;}
+  .table-container{margin:0 16px 24px;}
+  footer{padding:12px 16px 24px;}
 }
-
-.container:nth-of-type(1) h2 {
-  color: #166534;
-}
-
-.container:nth-of-type(1) thead th {
-  background: #dcfce7;
-  color: #14532d;
-}
-
-/* Interest Pay column */
-.container:nth-of-type(1) tbody td:nth-child(4) {
-  background: #ecfdf5;
-  color: #047857;
-  font-weight: 600;
-}
-
-.container:nth-of-type(1) tbody tr:hover {
-  background: #d1fae5;
-}
-
-/* ================= CORE STOCKS ================= */
-.container:nth-of-type(2) {
-  background: linear-gradient(180deg, #eff6ff, #ffffff);
-  border: 1px solid #bfdbfe;
-}
-
-.container:nth-of-type(2) h2 {
-  color: #1e40af;
-}
-
-.container:nth-of-type(2) thead th {
-  background: #e0f2fe;
-  color: #1e3a8a;
-}
-
-.container:nth-of-type(2) tbody tr:hover {
-  background: #dbeafe;
-}
-  /* ================= MULTIBAG ================= */
-.container:nth-of-type(5) {
-  background: linear-gradient(180deg, #fff7ed, #ffffff);
-  border: 1px solid #fed7aa;
-}
-
-.container:nth-of-type(5) h2 {
-  color: #9a3412;
-}
-
-.container:nth-of-type(5) thead th {
-  background: #ffedd5;
-  color: #7c2d12;
-}
-
-.container:nth-of-type(5) tbody tr:hover {
-  background: #fed7aa;
-}
-
-
-/* ================= ADDITIONAL STOCKS ================= */
-.container:nth-of-type(3) {
-  background: linear-gradient(180deg, #f5f3ff, #ffffff);
-  border: 1px solid #ddd6fe;
-}
-
-.container:nth-of-type(3) h2 {
-  color: #5b21b6;
-}
-
-.container:nth-of-type(3) thead th {
-  background: #ede9fe;
-  color: #4c1d95;
-}
-
-.container:nth-of-type(3) tbody tr:hover {
-  background: #e9d5ff;
-}
-
-/* ================= EVERGREEN ================= */
-.container:nth-of-type(4) {
-  background: linear-gradient(180deg, #ecfeff, #ffffff);
-  border: 1px solid #99f6e4;
-}
-
-  
-
-.container:nth-of-type(4) h2 {
-  color: #115e59;
-}
-
-.container:nth-of-type(4) thead th {
-  background: #ccfbf1;
-  color: #134e4a;
-}
-
-.container:nth-of-type(4) tbody tr:hover {
-  background: #99f6e4;
-}
-
 </style>
 </head>
-
 <body>
 
-<header>📊 Live Sheet Dashboard</header>
-
-<!-- ================= BONDS ================= -->
-<div class="container">
-<h2>SECURED BONDS</h2>
-<div class="toolbar">
-<input id="searchBonds" class="search" placeholder="Search Bonds">
-<span id="rowCountBonds" class="badge">0 rows</span>
-</div>
-
-<table>
-<thead>
-<tr>
-<th>Bond Name</th><th>COUPON</th><th>Rating</th><th>Maturity</th>
-<th>Interest Pay</th><th>YTM</th><th>Price</th><th>COUPONCODE</th>
-</tr>
-</thead>
-<tbody id="tableBodyBonds"></tbody>
-</table>
-<!-- ================= TAX FREE ================= -->
-<div class="container">
-<h2>Ranked Tax Free Bonds</h2>
-<table>
-<thead>
-<tr>
-<th>Company</th>
-
-<th>YTM</th>
-<th>Maturity</th>
-</tr>
-</thead>
-<tbody id="tableBodyTax"></tbody>
-</table>
-<span id="rowCountTax" class="badge">0 rows</span>
-</div>
-
-<!-- ================= CORE ================= -->
-<div class="container">
-<h2>Core Stocks</h2>
-<div class="toolbar">
-<input id="searchCore" class="search" placeholder="Search Core">
-<span id="rowCountCore" class="badge">0 rows</span>
-</div>
-
-<table>
-<thead>
-<tr>
-<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
-<th>Bookvalue</th><th>TGT</th><th>PE</th>
-<th>Bonus</th><th>Div</th>
-<th>M-CAL</th><th>D-CAL</th>
-</tr>
-</thead>
-<tbody id="tableBodyCore"></tbody>
-</table>
-</div>
-
-<!-- ================= ADDITIONAL ================= -->
-<div class="container">
-<h2>Additional Stocks</h2>
-<div class="toolbar">
-<input id="searchAdd" class="search" placeholder="Search Additional">
-<span id="rowCountAdd" class="badge">0 rows</span>
-</div>
-
-<table>
-<thead>
-<tr>
-<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
-<th>Bookvalue</th><th>TGT</th><th>PE</th>
-<th>Bonus</th><th>Div</th>
-<th>M-CAL</th><th>D-CAL</th>
-</tr>
-</thead>
-<tbody id="tableBodyAdd"></tbody>
-</table>
-</div>
-
-<!-- ================= EVERGREEN ================= -->
-<div class="container">
-<h2>Evergreen Stocks</h2>
-
-<table>
-<thead>
-<tr>
-<th>NSE</th><th>SECTOR</th><th>DCHG</th><th>CMP</th><th>Weightage</th>
-<th>Bookvalue</th><th>TGT</th><th>PE</th>
-<th>Bonus</th><th>Div</th>
-<th>M-CAL</th><th>D-CAL</th>
-</tr>
-</thead>
-<tbody id="tableBodyEver"></tbody>
-</table>
-</div>
-<!-- ================= MULTIBAG ================= -->
-<div class="container">
-  <h2>Multibag Stocks</h2>
-
-  <div class="toolbar">
-    <input id="searchMulti" class="search" placeholder="Search Multibag">
-    <span id="rowCountMulti" class="badge">0 rows</span>
+<header>
+  <div class="logo"><i class="fa-solid fa-chart-line"></i><span>Stock Screener</span></div>
+  <div class="header-right">
+    <div class="search-box">
+      <i class="fa-solid fa-search"></i>
+      <input type="text" id="searchInput" placeholder="Search stock or category…">
+    </div>
+    <button id="darkToggle" title="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
   </div>
+</header>
 
-  <table>
-    <thead>
-  <tr>
-    <th>Stock Name</th>
-    <th>NSE</th>
-    <th>SECTOR</th>
-    <th>DCHG</th>
-    <th>CMP</th>
-    <th>Book Value</th>
-    <th>PE</th>    
-    <th>M-CAL</th>
-  </tr>
-</thead>
+<section class="toolbar">
+  <button class="filter active" data-rating="0">All</button>
+  <button class="filter" data-rating="3">★★★</button>
+  <button class="filter" data-rating="2">★★☆</button>
+  <button class="filter" data-rating="1">★☆☆</button>
+  <button id="refreshBtn"><i class="fa-solid fa-rotate"></i>Refresh</button>
+</section>
 
-    <tbody id="tableBodyMulti"></tbody>
-  </table>
+<div class="result-count" id="resultCount"></div>
+
+<main>
+  <div class="table-container">
+    <table id="stockTable">
+      <thead>
+        <tr>
+          <th data-key="stock">Stock <span class="arrow">▾</span></th>
+          <th data-key="category">Category <span class="arrow">▾</span></th>
+          <th data-key="rating">Rating <span class="arrow">▾</span></th>
+          <th data-key="z">Trend · Low—Avg—High</th>
+          <th data-key="aa">M-CAL <span class="arrow">▾</span></th>
+          <th data-key="ab">D-CAL <span class="arrow">▾</span></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr><td colspan="6"><div class="loading"><div class="loader"></div>Loading stocks…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<footer>
+  <div>Live data from Google Sheets · not sourced from all markets, may be delayed up to 20 minutes</div>
+  <div id="lastUpdated">Loading…</div>
+</footer>
+
+<!-- ================= MODAL ================= -->
+<div id="stockModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2 id="modalTitle">Stock Details</h2>
+      <button id="closeModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="trend-wrap" id="modalTrend"></div>
+      <div class="detail"><label>Category</label><span id="mCategory"></span></div>
+      <div class="detail"><label>Rating</label><span id="mRating"></span></div>
+      <div class="detail"><label>Low</label><span id="mF"></span></div>
+      <div class="detail"><label>Avg</label><span id="mH"></span></div>
+      <div class="detail"><label>High</label><span id="mJ"></span></div>
+      <div class="detail"><label>CMP</label><span id="mZ"></span></div>
+      <div class="detail"><label>M-CAL</label><span id="mAA"></span></div>
+      <div class="detail"><label>D-CAL</label><span id="mAB"></span></div>
+    </div>
+  </div>
 </div>
-<!-- ================= SENTIMENT DASHBOARD ================= -->
-<div class="container" style="
-  background: linear-gradient(180deg, #fef3c7, #ffffff);
-  border: 1px solid #fde68a;
-  text-align: center;
-">
-  <h2 style="color:#92400e;">📈 Live Sentiment Dashboard</h2>
 
-  <p style="color:#78350f; margin-bottom:15px;">
-    View real-time sentiment analysis of Nifty stocks
-  </p>
-
-  <button onclick="goToDashboard()" style="
-    padding: 12px 22px;
-    border: none;
-    border-radius: 10px;
-    background: linear-gradient(90deg, #f59e0b, #d97706);
-    color: white;
-    font-size: 15px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
-    transition: all 0.2s ease;
-  "
-  onmouseover="this.style.transform='scale(1.05)'"
-  onmouseout="this.style.transform='scale(1)'"
-  >
-    Open Dashboard →
-  </button>
-</div>
 <script>
-// ===== STAR LOGIC =====
-function weightToStars(v){
-  v = parseInt(v,10);
-  if(isNaN(v)) return "-";
-  if(v<=3) return "⭐";
-  if(v<=6) return "⭐⭐";
-  if(v<=9) return "⭐⭐⭐";
-  if(v<=12) return "⭐⭐⭐⭐";
-  return "⭐⭐⭐⭐⭐";
+// ===========================
+// CONFIG
+// ===========================
+const API = "https://script.google.com/macros/s/AKfycbxNJB_SCY7rgzDcA6cjuuIxfhuVFsaHXjNsHrPbbUcipTMeYcBZtApUGEb4jJflsgg_/exec";
+const REFRESH_MS = 60000;
+
+let stocks = [];
+let filteredStocks = [];
+let sortKey = "rating";
+let sortAsc = false;
+let activeRatingFilter = 0;
+
+// ===========================
+// ELEMENTS
+// ===========================
+const tbody = document.getElementById("tableBody");
+const search = document.getElementById("searchInput");
+const refreshBtn = document.getElementById("refreshBtn");
+const updated = document.getElementById("lastUpdated");
+const resultCount = document.getElementById("resultCount");
+
+// ===========================
+// HELPERS
+// ===========================
+function clean(value){
+  if(value === "#N/A" || value === "#VALUE!" || value === "" || value === null || value === undefined) return "";
+  return value;
 }
-function goToDashboard() {
-  window.open("https://nifty-sad.streamlit.app/", "_blank");
+
+function num(value){
+  const n = parseFloat(String(clean(value)).replace(/[,₹%\s]/g,""));
+  return isNaN(n) ? NaN : n;
 }
-// ===== CSV PARSER (for ₹ commas) =====
-function parseCSVLine(line){
-  let res=[],cur="",q=false;
-  for(let c of line){
-    if(c=='"') q=!q;
-    else if(c==","&&!q){res.push(cur.trim());cur="";}
-    else cur+=c;
+
+// rating (0–20) -> star count out of 3
+function starCount(value){
+  const v = num(value);
+  if(isNaN(v) || v <= 0) return 0;
+  if(v <= 6) return 1;
+  if(v <= 13) return 2;
+  return 3;
+}
+
+function starsHTML(value){
+  const count = starCount(value);
+  let html = '<span class="stars">';
+  for(let i=0;i<3;i++) html += i < count ? "★" : '<span class="empty">★</span>';
+  html += "</span>";
+  return html;
+}
+
+// ===========================
+// REAL-TIME TREND SVG (low / avg / high / cmp)
+// ===========================
+function trendSVG(low, avg, high, cmp, size){
+  size = size || {w:150, h:52};
+  low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
+
+  if([low,avg,high,cmp].some(isNaN) || high <= low){
+    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 150 52"></svg>`;
   }
-  res.push(cur.trim());
-  return res;
+
+  const min = Math.min(low, cmp);
+  const max = Math.max(high, cmp);
+  const range = (max - min) || 1;
+
+  const padL = 14, padR = 14, top = 8, bottom = 34;
+  const x = v => padL + ((v - min) / range) * (150 - padL - padR);
+  const yBase = 26;
+
+  const color = cmp < avg ? "#16a34a" : cmp > avg ? "#dc2626" : "#f59e0b";
+
+  const xLow = x(low), xAvg = x(avg), xHigh = x(high), xCmp = x(cmp);
+
+  return `
+<svg width="${size.w}" height="${size.h}" viewBox="0 0 150 52" xmlns="http://www.w3.org/2000/svg">
+  <line x1="${padL}" y1="${yBase}" x2="${150-padR}" y2="${yBase}" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round"/>
+  <line x1="${xLow}" y1="${yBase-6}" x2="${xLow}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
+  <line x1="${xAvg}" y1="${yBase-6}" x2="${xAvg}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
+  <line x1="${xHigh}" y1="${yBase-6}" x2="${xHigh}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
+  <circle cx="${xCmp}" cy="${yBase}" r="5" fill="${color}" stroke="white" stroke-width="1.5"/>
+  <text x="${xLow}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${low.toLocaleString()}</text>
+  <text x="${xAvg}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${avg.toLocaleString()}</text>
+  <text x="${xHigh}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${high.toLocaleString()}</text>
+  <text x="${xCmp}" y="${top-1}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${color}" font-family="Inter,sans-serif">${cmp.toLocaleString()}</text>
+</svg>`;
 }
-function extractMinPrice(val){
-  if(!val) return "";
 
-  val = val.toLowerCase();
+// ===========================
+// LOAD DATA
+// ===========================
+async function loadStocks(){
+  refreshBtn.classList.add("spin");
+  tbody.innerHTML = `<tr><td colspan="6"><div class="loading"><div class="loader"></div>Loading stocks…</div></td></tr>`;
 
-  // Handle lakh
-  if(val.includes("lakh")){
-    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
-    return isNaN(num) ? "" : Math.round(num * 100000);
+  try{
+    const response = await fetch(API);
+    stocks = await response.json();
+    applyFilters();
+    updated.textContent = "Updated: " + new Date().toLocaleTimeString();
+  } catch(e){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-row">Unable to load data. Check the API connection.</div></td></tr>`;
+    console.error(e);
+  } finally {
+    refreshBtn.classList.remove("spin");
   }
-
-  // Handle k (thousand)
-  if(val.includes("k")){
-    const num = parseFloat(val.replace(/[^0-9.]/g, ""));
-    return isNaN(num) ? "" : Math.round(num * 1000);
-  }
-
-  // Handle plain numbers (₹75,000 etc.)
-  const cleaned = val.replace(/[^0-9.]/g, "");
-  return cleaned ? Number(cleaned) : "";
 }
 
+// ===========================
+// FILTER + SORT
+// ===========================
+function applyFilters(){
+  const keyword = search.value.trim().toLowerCase();
 
-// ---------- TENURE → MONTH + YEAR ----------
-function tenureToMonthYear(val){
-  if(!val) return "";
-  const months = parseInt(val.replace(/\D/g,""),10);
-  if(isNaN(months)) return "";
-
-  const now = new Date();               // built-in current date
-  const baseYear = now.getFullYear();
-  const baseMonth = now.getMonth()+1;     // Jan = 0
-
-  const total = baseMonth + months;
-  const year = baseYear + Math.floor(total / 12);
-  const monthIndex = total % 12;
-
-  const names = ["Jan","Feb","Mar","Apr","May","Jun",
-                 "Jul","Aug","Sep","Oct","Nov","Dec"];
-
-  return `${names[monthIndex]} ${year}`;
-}
-
-
-// ===== GENERIC STOCK LOADER =====
-async function loadStock(csv, body, map, count){
-  const t = await (await fetch(csv+"&t="+Date.now())).text();
-  const rows = t.split("\n").slice(1);
-  body.innerHTML="";
-  rows.forEach(r=>{
-    if(!r.trim()) return;
-    const c=r.split(",");
-    const tr=document.createElement("tr");
-    tr.innerHTML=map(c);
-    body.appendChild(tr);
+  filteredStocks = stocks.filter(s => {
+    const matchesSearch = !keyword ||
+      String(s.stock||"").toLowerCase().includes(keyword) ||
+      String(s.category||"").toLowerCase().includes(keyword);
+    const matchesRating = !activeRatingFilter || starCount(s.rating) === activeRatingFilter;
+    return matchesSearch && matchesRating;
   });
-  if(count) count.innerText=body.children.length+" rows";
-}
 
-// ===== LOAD BONDS =====
-async function loadBonds(){
-  const t=await (await fetch(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t="+Date.now()
-)).text();
-
-  const rows=t.split("\n").slice(1);
-  const b=document.getElementById("tableBodyBonds");
-  b.innerHTML="";
-  rows.forEach(r=>{
-    const c=parseCSVLine(r);
-    if(!c[0]) return;
-    b.innerHTML+=`
-    <tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td>
-    <td>${c[3]}</td><td>${c[4]}</td><td>${c[5]}</td><td>${c[6]}</td><td>${c[8]}</td></tr>`;
+  filteredStocks.sort((a,b) => {
+    let x = a[sortKey], y = b[sortKey];
+    const nx = num(x), ny = num(y);
+    if(!isNaN(nx) && !isNaN(ny)){ x = nx; y = ny; }
+    else { x = String(x||"").toLowerCase(); y = String(y||"").toLowerCase(); }
+    if(x < y) return sortAsc ? -1 : 1;
+    if(x > y) return sortAsc ? 1 : -1;
+    return 0;
   });
-  document.getElementById("rowCountBonds").innerText=b.children.length+" rows";
+
+  renderTable(filteredStocks);
+  resultCount.textContent = `${filteredStocks.length} of ${stocks.length} stocks`;
 }
-async function loadTaxFreeBonds(){
-  const t = await (await fetch(
-    "https://docs.google.com/spreadsheets/d/e/2PACX-1vTnH2pXuMnGI1RDWNwWOIcLVX9yoXGGps-nV9YCoqaNOr0ZT3e-oCpgFkxio8DnxNTfoQf8NYdfz545/pub?gid=499477798&single=true&output=csv&t=" + Date.now()
-  )).text();
 
-  // Start from row 4 (header + 3 blank rows skipped)
-  const rows = t.split("\n").slice(3);
-  const body = document.getElementById("tableBodyTax");
-  body.innerHTML = "";
+// ===========================
+// RENDER TABLE
+// ===========================
+function renderTable(data){
+  if(!data.length){
+    tbody.innerHTML = `<tr><td colspan="6"><div class="empty-row">No stocks match your filters</div></td></tr>`;
+    return;
+  }
 
-  rows.forEach(r => {
-    if (!r.trim()) return;
-
-    const c = parseCSVLine(r);
-
-    const company  = c[17];                   // R
-    //const sold     = extractMinPrice(c[19]);  // T → Min. ₹1 lakh → 100000
-    const ytm      = c[20];                   // U → 11.15%
-    const maturity = tenureToMonthYear(c[21]); // V → 22 months → Oct 2028
-    const interest = c[22];                   // W → Monthly
-
-    if (!company) return;
-
-    body.innerHTML += `
-      <tr>
-        <td>${company}</td>
-  
-        <td>${ytm}</td>
-        <td>${maturity}</td>
-      </tr>
+  tbody.innerHTML = "";
+  data.forEach(stock => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>
+        <div class="stock-name">${clean(stock.stock)}</div>
+      </td>
+      <td><span class="badge category-badge">${clean(stock.category)}</span></td>
+      <td>${starsHTML(stock.rating)}</td>
+      <td class="trend-cell">${trendSVG(stock.f, stock.h, stock.j, stock.z)}</td>
+      <td>${clean(stock.aa)}</td>
+      <td>${clean(stock.ab)}</td>
     `;
+    row.addEventListener("click", () => openModal(stock));
+    tbody.appendChild(row);
   });
-
-  document.getElementById("rowCountTax").innerText =
-    body.children.length + " rows";
 }
 
-// ===== CORE =====
-loadStock(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1284854745&single=true&output=csv",
-document.getElementById("tableBodyCore"),
-c => `
-<td>${c[0]}</td>   <!-- NSE -->
-<td>${c[1]}</td>   <!-- SECTOR -->
-<td>${c[2]}</td>   <!-- DCHG -->
-<td>${c[3]}</td>   <!-- CMP -->
-<td class="stars">${weightToStars(c[5])}</td> <!-- analyse -->
-<td>${c[4]}</td>   <!-- Bookvalue -->
-<td>${c[6]}</td>   <!-- TGT -->
-<td>${c[7]}</td>   <!-- PE -->
-<td>${c[8]}</td>   <!-- Bonus -->
-<td>${c[9]}</td>   <!-- Div -->
-<td>${c[10]}</td>  <!-- Facevalue -->
-<td>${c[11]}</td>  <!-- M-CAL -->
-<td>${c[12]}</td>  <!-- D-CAL -->
-`
-,
-document.getElementById("rowCountCore")
-);
+// ===========================
+// MODAL
+// ===========================
+const modal = document.getElementById("stockModal");
 
+function openModal(stock){
+  document.getElementById("modalTitle").textContent = clean(stock.stock);
+  document.getElementById("modalTrend").innerHTML = trendSVG(stock.f, stock.h, stock.j, stock.z, {w:220, h:60});
+  document.getElementById("mCategory").textContent = clean(stock.category);
+  document.getElementById("mRating").innerHTML = starsHTML(stock.rating);
+  document.getElementById("mF").textContent = clean(stock.f) ? "₹" + stock.f : "–";
+  document.getElementById("mH").textContent = clean(stock.h) ? "₹" + stock.h : "–";
+  document.getElementById("mJ").textContent = clean(stock.j) ? "₹" + stock.j : "–";
+  document.getElementById("mZ").textContent = clean(stock.z) ? "₹" + stock.z : "–";
+  document.getElementById("mAA").textContent = clean(stock.aa) || "–";
+  document.getElementById("mAB").textContent = clean(stock.ab) || "–";
+  modal.classList.add("show");
+}
 
-// ===== ADDITIONAL =====
-loadStock(
-  "https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=1284854745&single=true&output=csv",
-  document.getElementById("tableBodyCore"),
-  c => `
-    <td>${c[0]}</td>   <!-- NSE -->
-    <td>${c[1]}</td>   <!-- SECTOR -->
-    <td>${c[2]}</td>   <!-- DCHG -->
-    <td>${c[3]}</td>   <!-- CMP -->
-    <td class="stars">${weightToStars(Number(c[4]) || 0)}</td> <!-- Anly -->
-    <td>${c[7]}</td>   <!-- Bookvalue -->
-    <td>${c[5]}</td>   <!-- TGT (UH) -->
-    <td>${c[6]}</td>   <!-- PE -->
-    <td>${c[9]}</td>   <!-- Bonus -->
-    <td>${c[8]}</td>   <!-- Div -->
-    <td>${c[10]}</td>  <!-- M-CAL -->
-    <td>${c[11]}</td>  <!-- D-CAL -->
-  `,
-  document.getElementById("rowCountCore")
-);
+document.getElementById("closeModal").addEventListener("click", () => modal.classList.remove("show"));
+modal.addEventListener("click", e => { if(e.target === modal) modal.classList.remove("show"); });
 
+// ===========================
+// EVENTS
+// ===========================
+refreshBtn.addEventListener("click", loadStocks);
+search.addEventListener("input", applyFilters);
 
+document.querySelectorAll(".filter").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    activeRatingFilter = Number(btn.dataset.rating);
+    applyFilters();
+  });
+});
 
-// ===== EVERGREEN =====
-loadStock(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=492196644&single=true&output=csv",
-document.getElementById("tableBodyEver"),
-c=>`
-<td>${c[1]}</td>   <!-- NSE -->
-<td>${c[2]}</td>   <!-- SECTOR -->
-<td>${c[3]}</td>
-<td>${c[4]}</td>
-<td>${c[5]}</td>
-<td>${c[6]}</td>
-<td>${c[7]}</td>
-<td>${c[8]}</td>
-<td>${c[9]}</td>
-<td>${c[10]}</td>
-<td>${c[11]}</td>
-`
-);
+document.querySelectorAll("th[data-key]").forEach(th => {
+  th.addEventListener("click", () => {
+    const key = th.dataset.key;
+    if(sortKey === key){ sortAsc = !sortAsc; } else { sortKey = key; sortAsc = true; }
+    document.querySelectorAll("th").forEach(t => { t.classList.remove("sorted"); const a = t.querySelector(".arrow"); if(a) a.textContent = "▾"; });
+    th.classList.add("sorted");
+    const arrow = th.querySelector(".arrow");
+    if(arrow) arrow.textContent = sortAsc ? "▴" : "▾";
+    applyFilters();
+  });
+});
 
+document.getElementById("darkToggle").addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  const icon = document.querySelector("#darkToggle i");
+  icon.className = document.body.classList.contains("dark") ? "fa-solid fa-sun" : "fa-solid fa-moon";
+});
 
-//===== MULTIBAG ===== 
-loadStock(
-"https://docs.google.com/spreadsheets/d/e/2PACX-1vTMii4ujWUq6_wBkZaryA1LFhb4Dkw81NUaJju0kkmJzlcPV0SvNo8HzL1C7hSSZq5V-ZpnWdNLf_fe/pub?gid=2100565653&single=true&output=csv",
-document.getElementById("tableBodyMulti"),
-c=>`
-<td>${c[0]}</td>  <!-- Stock Name -->
-<td>${c[1]}</td>  <!-- NSE -->
-<td>${c[2]}</td>  <!-- SECTOR -->
-<td>${c[3]}</td>  <!-- DCHG -->
-<td>${c[4]}</td>  <!-- CMP -->
-<td>${c[5]}</td>  <!-- Book Value -->
-<td>${c[6]}</td>  <!-- PE -->
-<td>${c[7]}</td>  <!-- M-CAL -->
-`,
-document.getElementById("rowCountMulti")
-);
-
-
-
-// ===== INIT =====
-loadBonds();
-loadTaxFreeBonds();
-setInterval(loadTaxFreeBonds, 1800000);
-
-setInterval(loadBonds,1800000);
+// ===========================
+// START
+// ===========================
+loadStocks();
+setInterval(loadStocks, REFRESH_MS);
 </script>
 
 </body>
