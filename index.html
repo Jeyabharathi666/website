@@ -361,109 +361,72 @@ function starsHTML(value){
 // ===========================
 // REAL-TIME TREND SVG (low / avg / high / cmp)
 // ===========================
-function trendSVG(low, avg, high, cmp, size = {w:140, h:55}) {
+function trendSVG(low, avg, high, cmp, size){
+  size = size || {w:140, h:55};
+  low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
 
-    low = num(low);
-    avg = num(avg);
-    high = num(high);
-    cmp = num(cmp);
+  if([low,avg,high,cmp].some(isNaN) || high <= low || avg <= low || avg >= high){
+    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 55"></svg>`;
+  }
 
-    if([low,avg,high,cmp].some(isNaN) || high <= low){
-        return "";
-    }
+  // Fixed, uniform anchor coordinates — same for every stock, only the
+  // labels/value change. Shape: rise -> flat (Low to Avg) -> rise (Avg to High).
+  const xPreLow  = 8,   yPreLow  = 34;
+  const xLow     = 25,  yLow     = 20;
+  const xAvg     = 75,  yAvg     = 20;   // flat segment: yAvg === yLow
+  const xHigh    = 120, yHigh    = 8;
+  const xPostHigh= 135, yPostHigh= 4;
 
-    const W = size.w;
-    const H = size.h;
+  const grey = "#c4c9cc";
+  const greyText = "#8a9096";
+  const cmpColor = cmp < avg ? "#2e8b7c" : cmp > avg ? "#dc2626" : "#f59e0b";
 
-    // Fixed X positions
-    const xLow  = 20;
-    const xCmp  = 50;
-    const xAvg  = 100;
-    const xHigh = 130;
+  const clamp01 = t => Math.max(0, Math.min(1, t));
+  const lerp = (a, b, t) => a + (b - a) * t;
 
-    // Map value to Y position
-    const top = 8;
-    const bottom = 25;
+  // Place cmp by walking the same fixed path: which segment it falls in
+  // depends on its value vs low/avg/high; its position within that
+  // segment is proportional to how far along the value range it sits.
+  let xCmp, yCmp;
+  if(cmp < low){
+    const t = clamp01(1 - (low - cmp) / ((high - low) || 1));
+    xCmp = lerp(xPreLow, xLow, t);
+    yCmp = lerp(yPreLow, yLow, t);
+  } else if(cmp <= avg){
+    const t = clamp01((cmp - low) / ((avg - low) || 1));
+    xCmp = lerp(xLow, xAvg, t);
+    yCmp = lerp(yLow, yAvg, t);
+  } else if(cmp <= high){
+    const t = clamp01((cmp - avg) / ((high - avg) || 1));
+    xCmp = lerp(xAvg, xHigh, t);
+    yCmp = lerp(yAvg, yHigh, t);
+  } else {
+    const t = clamp01((cmp - high) / ((high - low) || 1));
+    xCmp = lerp(xHigh, xPostHigh, t);
+    yCmp = lerp(yHigh, yPostHigh, t);
+  }
 
-    function y(v){
-        return bottom - ((v-low)/(high-low))*(bottom-top);
-    }
+  const pathPts = `${xPreLow},${yPreLow} ${xLow},${yLow} ${xAvg},${yAvg} ${xHigh},${yHigh}`;
 
-    const yLow  = y(low);
-    const yCmp  = y(cmp);
-    const yAvg  = y(avg);
-    const yHigh = y(high);
+  const anchors = [
+    {v:low,  x:xLow,  y:yLow,  color:grey, r:3},
+    {v:avg,  x:xAvg,  y:yAvg,  color:grey, r:3},
+    {v:high, x:xHigh, y:yHigh, color:grey, r:3}
+  ];
 
-    const cmpColor =
-        cmp < avg ? "#16a34a" :
-        cmp > avg ? "#dc2626" :
-        "#2e8b7c";
+  const ticks = anchors.map(p => `<line x1="${p.x}" y1="${p.y-5}" x2="${p.x}" y2="${p.y+5}" stroke="${p.color}" stroke-width="1.5"/>`).join("\n  ");
+  const circles = anchors.map(p => `<circle cx="${p.x}" cy="${p.y}" r="${p.r}" fill="${p.color}"/>`).join("\n  ");
+  const labels = anchors.map(p => `<text x="${p.x}" y="${p.y+17}" text-anchor="middle" font-size="8" font-family="Inter,sans-serif" fill="${greyText}">${p.v.toLocaleString()}</text>`).join("\n  ");
 
-    return `
-<svg xmlns="http://www.w3.org/2000/svg"
-     width="${W}"
-     height="${H}"
-     viewBox="0 0 140 55">
-
-    <line x1="${xLow}" y1="${yLow-5}" x2="${xLow}" y2="${yLow+5}"
-          stroke="#c4c9cc" stroke-width="1.5"/>
-
-    <line x1="${xCmp}" y1="${yCmp-5}" x2="${xCmp}" y2="${yCmp+5}"
-          stroke="${cmpColor}" stroke-width="2"/>
-
-    <line x1="${xAvg}" y1="${yAvg-5}" x2="${xAvg}" y2="${yAvg+5}"
-          stroke="#c4c9cc" stroke-width="1.5"/>
-
-    <line x1="${xHigh}" y1="${yHigh-5}" x2="${xHigh}" y2="${yHigh+5}"
-          stroke="#c4c9cc" stroke-width="1.5"/>
-
-    <polyline
-        points="
-5,${yLow+7}
-${xLow},${yLow}
-${xCmp},${yCmp}
-${xAvg},${yAvg}
-${xHigh},${yHigh}
-"
-        fill="none"
-        stroke="#c4c9cc"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"/>
-
-    <circle cx="${xLow}" cy="${yLow}" r="3"
-            fill="#c4c9cc"/>
-
-    <circle cx="${xCmp}" cy="${yCmp}" r="3.5"
-            fill="${cmpColor}"/>
-
-    <circle cx="${xAvg}" cy="${yAvg}" r="3"
-            fill="#c4c9cc"/>
-
-    <circle cx="${xHigh}" cy="${yHigh}" r="3.5"
-            fill="#c4c9cc"/>
-
-    <text x="${xLow}" y="42"
-          text-anchor="middle"
-          font-size="8"
-          fill="#8a9096">${low}</text>
-
-    <text x="${xCmp}" y="42"
-          text-anchor="middle"
-          font-size="9"
-          font-weight="bold"
-          fill="${cmpColor}">${cmp}</text>
-
-    <text x="${xAvg}" y="42"
-          text-anchor="middle"
-          font-size="8"
-          fill="#8a9096">${avg}</text>
-
-    <text x="${xHigh}" y="42"
-          text-anchor="middle"
-          font-size="8"
-          fill="#8a9096">${high}</text>
-
+  return `
+<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 55" xmlns="http://www.w3.org/2000/svg">
+  <polyline points="${pathPts}" fill="none" stroke="${grey}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  ${ticks}
+  <line x1="${xCmp}" y1="${yCmp-6}" x2="${xCmp}" y2="${yCmp+6}" stroke="${cmpColor}" stroke-width="2"/>
+  ${circles}
+  <circle cx="${xCmp}" cy="${yCmp}" r="3.5" fill="${cmpColor}"/>
+  ${labels}
+  <text x="${xCmp}" y="${yCmp-9}" text-anchor="middle" font-size="9" font-weight="bold" font-family="Inter,sans-serif" fill="${cmpColor}">${cmp.toLocaleString()}</text>
 </svg>`;
 }
 
