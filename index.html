@@ -361,37 +361,109 @@ function starsHTML(value){
 // ===========================
 // REAL-TIME TREND SVG (low / avg / high / cmp)
 // ===========================
-function trendSVG(low, avg, high, cmp, size){
-  size = size || {w:150, h:52};
-  low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
+function trendSVG(low, avg, high, cmp, size = {w:140, h:55}) {
 
-  if([low,avg,high,cmp].some(isNaN) || high <= low){
-    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 150 52"></svg>`;
-  }
+    low = num(low);
+    avg = num(avg);
+    high = num(high);
+    cmp = num(cmp);
 
-  const min = Math.min(low, cmp);
-  const max = Math.max(high, cmp);
-  const range = (max - min) || 1;
+    if([low,avg,high,cmp].some(isNaN) || high <= low){
+        return "";
+    }
 
-  const padL = 14, padR = 14, top = 8, bottom = 34;
-  const x = v => padL + ((v - min) / range) * (150 - padL - padR);
-  const yBase = 26;
+    const W = size.w;
+    const H = size.h;
 
-  const color = cmp < avg ? "#16a34a" : cmp > avg ? "#dc2626" : "#f59e0b";
+    // Fixed X positions
+    const xLow  = 20;
+    const xCmp  = 50;
+    const xAvg  = 100;
+    const xHigh = 130;
 
-  const xLow = x(low), xAvg = x(avg), xHigh = x(high), xCmp = x(cmp);
+    // Map value to Y position
+    const top = 8;
+    const bottom = 25;
 
-  return `
-<svg width="${size.w}" height="${size.h}" viewBox="0 0 150 52" xmlns="http://www.w3.org/2000/svg">
-  <line x1="${padL}" y1="${yBase}" x2="${150-padR}" y2="${yBase}" stroke="#e5e7eb" stroke-width="2" stroke-linecap="round"/>
-  <line x1="${xLow}" y1="${yBase-6}" x2="${xLow}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
-  <line x1="${xAvg}" y1="${yBase-6}" x2="${xAvg}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
-  <line x1="${xHigh}" y1="${yBase-6}" x2="${xHigh}" y2="${yBase+6}" stroke="#9ca3af" stroke-width="1.5"/>
-  <circle cx="${xCmp}" cy="${yBase}" r="5" fill="${color}" stroke="white" stroke-width="1.5"/>
-  <text x="${xLow}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${low.toLocaleString()}</text>
-  <text x="${xAvg}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${avg.toLocaleString()}</text>
-  <text x="${xHigh}" y="${bottom+9}" text-anchor="middle" font-size="8" fill="#6b7280" font-family="Inter,sans-serif">${high.toLocaleString()}</text>
-  <text x="${xCmp}" y="${top-1}" text-anchor="middle" font-size="8.5" font-weight="700" fill="${color}" font-family="Inter,sans-serif">${cmp.toLocaleString()}</text>
+    function y(v){
+        return bottom - ((v-low)/(high-low))*(bottom-top);
+    }
+
+    const yLow  = y(low);
+    const yCmp  = y(cmp);
+    const yAvg  = y(avg);
+    const yHigh = y(high);
+
+    const cmpColor =
+        cmp < avg ? "#16a34a" :
+        cmp > avg ? "#dc2626" :
+        "#2e8b7c";
+
+    return `
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="${W}"
+     height="${H}"
+     viewBox="0 0 140 55">
+
+    <line x1="${xLow}" y1="${yLow-5}" x2="${xLow}" y2="${yLow+5}"
+          stroke="#c4c9cc" stroke-width="1.5"/>
+
+    <line x1="${xCmp}" y1="${yCmp-5}" x2="${xCmp}" y2="${yCmp+5}"
+          stroke="${cmpColor}" stroke-width="2"/>
+
+    <line x1="${xAvg}" y1="${yAvg-5}" x2="${xAvg}" y2="${yAvg+5}"
+          stroke="#c4c9cc" stroke-width="1.5"/>
+
+    <line x1="${xHigh}" y1="${yHigh-5}" x2="${xHigh}" y2="${yHigh+5}"
+          stroke="#c4c9cc" stroke-width="1.5"/>
+
+    <polyline
+        points="
+5,${yLow+7}
+${xLow},${yLow}
+${xCmp},${yCmp}
+${xAvg},${yAvg}
+${xHigh},${yHigh}
+"
+        fill="none"
+        stroke="#c4c9cc"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+    <circle cx="${xLow}" cy="${yLow}" r="3"
+            fill="#c4c9cc"/>
+
+    <circle cx="${xCmp}" cy="${yCmp}" r="3.5"
+            fill="${cmpColor}"/>
+
+    <circle cx="${xAvg}" cy="${yAvg}" r="3"
+            fill="#c4c9cc"/>
+
+    <circle cx="${xHigh}" cy="${yHigh}" r="3.5"
+            fill="#c4c9cc"/>
+
+    <text x="${xLow}" y="42"
+          text-anchor="middle"
+          font-size="8"
+          fill="#8a9096">${low}</text>
+
+    <text x="${xCmp}" y="42"
+          text-anchor="middle"
+          font-size="9"
+          font-weight="bold"
+          fill="${cmpColor}">${cmp}</text>
+
+    <text x="${xAvg}" y="42"
+          text-anchor="middle"
+          font-size="8"
+          fill="#8a9096">${avg}</text>
+
+    <text x="${xHigh}" y="42"
+          text-anchor="middle"
+          font-size="8"
+          fill="#8a9096">${high}</text>
+
 </svg>`;
 }
 
