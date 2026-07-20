@@ -362,7 +362,7 @@ function starsHTML(value){
 // REAL-TIME TREND SVG (low / avg / high / cmp)
 // ===========================
 function trendSVG(low, avg, high, cmp, size){
-  size = size || {w:140, h:55};
+  size = size || {w:180, h:55};
   low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
 
   if([low,avg,high,cmp].some(isNaN) || high <= low || avg <= low || avg >= high){
