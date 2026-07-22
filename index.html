@@ -153,6 +153,32 @@ th:hover{color:var(--primary);}
 th .arrow{opacity:0;font-size:9px;margin-left:3px;}
 th.sorted .arrow{opacity:1;color:var(--primary);}
 
+/* ---- Column filter row ---- */
+.filter-row{background:var(--card);}
+.filter-row th{
+  padding:6px 10px 12px;
+  cursor:default;
+  border-bottom:1px solid var(--border);
+}
+.col-filter{
+  width:100%;
+  max-width:180px;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:500;
+  text-transform:none;
+  letter-spacing:normal;
+  color:var(--text);
+  background:var(--bg);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:6px 8px;
+  outline:none;
+  cursor:pointer;
+}
+.col-filter:hover{border-color:var(--primary);}
+.col-filter:focus{border-color:var(--primary);}
+
 td{
   padding:12px 16px;
   border-bottom:1px solid var(--border);
@@ -247,16 +273,12 @@ footer{
       <input type="text" id="searchInput" placeholder="Search stock or category…">
     </div>
     <button id="darkToggle" title="Toggle dark mode"><i class="fa-solid fa-moon"></i></button>
+     <button id="refreshBtn"><i class="fa-solid fa-rotate"></i>Refresh</button>
   </div>
+
 </header>
 
-<section class="toolbar">
-  <button class="filter active" data-rating="0">All</button>
-  <button class="filter" data-rating="3">★★★</button>
-  <button class="filter" data-rating="2">★★☆</button>
-  <button class="filter" data-rating="1">★☆☆</button>
-  <button id="refreshBtn"><i class="fa-solid fa-rotate"></i>Refresh</button>
-</section>
+
 
 <div class="result-count" id="resultCount"></div>
 
@@ -271,6 +293,14 @@ footer{
           <th data-key="z">Trend · Low—Avg—High</th>
           <th data-key="aa">M-CAL <span class="arrow">▾</span></th>
           <th data-key="ab">D-CAL <span class="arrow">▾</span></th>
+        </tr>
+        <tr class="filter-row">
+          <th></th>
+          <th><select class="col-filter" id="colFilterCategory" data-col="category"><option value="">All Categories</option></select></th>
+          <th><select class="col-filter" id="colFilterRating" data-col="rating"><option value="">All Ratings</option></select></th>
+          <th></th>
+          <th><select class="col-filter" id="colFilterAA" data-col="aa"><option value="">All M-CAL</option></select></th>
+          <th></th>
         </tr>
       </thead>
       <tbody id="tableBody">
@@ -318,6 +348,9 @@ let filteredStocks = [];
 let sortKey = "rating";
 let sortAsc = false;
 let activeRatingFilter = 0;
+
+// per-column dropdown filters: { category: "", rating: "", aa: "" }
+let colFilters = { category:"", rating:"", aa:"" };
 
 // ===========================
 // ELEMENTS
@@ -440,6 +473,7 @@ async function loadStocks(){
   try{
     const response = await fetch(API);
     stocks = await response.json();
+    populateColumnFilters();
     applyFilters();
     updated.textContent = "Updated: " + new Date().toLocaleTimeString();
   } catch(e){
@@ -449,6 +483,60 @@ async function loadStocks(){
     refreshBtn.classList.remove("spin");
   }
 }
+
+// ===========================
+// COLUMN DROPDOWN FILTERS
+// ===========================
+function populateColumnFilters(){
+  const selects = document.querySelectorAll(".col-filter");
+
+  selects.forEach(select => {
+    const col = select.dataset.col;
+    const previousValue = select.value;
+
+    // Rebuild options, keeping the "All" placeholder first
+    const placeholder = select.querySelector('option[value=""]');
+    select.innerHTML = "";
+    if(placeholder) select.appendChild(placeholder);
+
+    if(col === "rating"){
+      // Fixed star-count options (1–3), using the same starCount() logic
+      // that renders the stars, so this always stays in sync with the table.
+      const starLabels = { 1:"★☆☆", 2:"★★☆", 3:"★★★" };
+      [1,2,3].forEach(count => {
+        const opt = document.createElement("option");
+        opt.value = String(count);
+        opt.textContent = starLabels[count];
+        select.appendChild(opt);
+      });
+    } else {
+      // Collect distinct, non-empty values for this column
+      const values = [...new Set(
+        stocks
+          .map(s => clean(s[col]))
+          .filter(v => v !== "" && v !== null && v !== undefined)
+          .map(v => String(v))
+      )].sort((a,b) => a.localeCompare(b, undefined, {numeric:true}));
+
+      values.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      });
+    }
+
+    // Restore previous selection if it's still a valid option
+    if([...select.options].some(o => o.value === previousValue)) select.value = previousValue;
+  });
+}
+
+document.querySelectorAll(".col-filter").forEach(select => {
+  select.addEventListener("change", () => {
+    colFilters[select.dataset.col] = select.value;
+    applyFilters();
+  });
+});
 
 // ===========================
 // FILTER + SORT
@@ -461,7 +549,15 @@ function applyFilters(){
       String(s.stock||"").toLowerCase().includes(keyword) ||
       String(s.category||"").toLowerCase().includes(keyword);
     const matchesRating = !activeRatingFilter || starCount(s.rating) === activeRatingFilter;
-    return matchesSearch && matchesRating;
+
+    const matchesColumns = Object.keys(colFilters).every(col => {
+      const filterValue = colFilters[col];
+      if(!filterValue) return true;
+      if(col === "rating") return starCount(s.rating) === Number(filterValue);
+      return String(clean(s[col])) === filterValue;
+    });
+
+    return matchesSearch && matchesRating && matchesColumns;
   });
 
   filteredStocks.sort((a,b) => {
