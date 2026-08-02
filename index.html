@@ -473,6 +473,7 @@ async function loadStocks(){
   try{
     const response = await fetch(API);
     stocks = await response.json();
+    console.log(stocks[0]);
     populateColumnFilters();
     applyFilters();
     updated.textContent = "Updated: " + new Date().toLocaleTimeString();
