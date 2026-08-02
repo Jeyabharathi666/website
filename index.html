@@ -399,7 +399,7 @@ function trendSVG(low, avg, high, cmp, size){
   low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
 
   if([low,avg,high,cmp].some(isNaN) || high <= low || avg <= low || avg >= high){
-    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 65"></svg>`;
+    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 45"></svg>`;
   }
 
   // Fixed, uniform anchor coordinates — same for every stock, only the
