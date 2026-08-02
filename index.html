@@ -399,7 +399,7 @@ function trendSVG(low, avg, high, cmp, size){
   low = num(low); avg = num(avg); high = num(high); cmp = num(cmp);
 
   if([low,avg,high,cmp].some(isNaN) || high <= low || avg <= low || avg >= high){
-    return `<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 45"></svg>`;
+    return `<svg width="${size.w}" height="${size.h}" viewBox="0 -10 140 45"></svg>`;
   }
 
   // Fixed, uniform anchor coordinates — same for every stock, only the
@@ -452,7 +452,7 @@ function trendSVG(low, avg, high, cmp, size){
   const labels = anchors.map(p => `<text x="${p.x}" y="${p.y+17}" text-anchor="middle" font-size="8" font-family="Inter,sans-serif" fill="${greyText}">${p.v.toLocaleString()}</text>`).join("\n  ");
 
   return `
-<svg width="${size.w}" height="${size.h}" viewBox="0 0 140 65" xmlns="http://www.w3.org/2000/svg">
+<svg width="${size.w}" height="${size.h}" viewBox="0 -10 140 45" xmlns="http://www.w3.org/2000/svg">
   <polyline points="${pathPts}" fill="none" stroke="${grey}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
   ${ticks}
   <line x1="${xCmp}" y1="${yCmp-6}" x2="${xCmp}" y2="${yCmp+6}" stroke="${cmpColor}" stroke-width="2"/>
