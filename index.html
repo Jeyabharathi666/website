@@ -251,7 +251,23 @@ footer{
   display:flex;justify-content:space-between;padding:16px 32px 32px;
   color:var(--text2);font-size:12.5px;flex-wrap:wrap;gap:8px;
 }
+/* ===== Row Colors ===== */
 
+.row-green td{
+    background:#edf9f0;
+}
+
+.row-purple td{
+    background:#f4f0ff;
+}
+
+.row-green:hover td{
+    background:#e3f4e8 !important;
+}
+
+.row-purple:hover td{
+    background:#ebe3ff !important;
+}
 /* ============ RESPONSIVE ============ */
 @media(max-width:760px){
   header{flex-direction:column;height:auto;padding:16px;gap:12px;}
@@ -587,6 +603,22 @@ function renderTable(data){
   tbody.innerHTML = "";
   data.forEach(stock => {
     const row = document.createElement("tr");
+    const color = (stock.rowColor || "").toLowerCase();
+
+    switch(color){
+    
+        // Google Sheets Green
+        case "#b6d7a8":
+        case "#d9ead3":
+            row.classList.add("row-green");
+            break;
+    
+        // Google Sheets Purple
+        case "#d9d2e9":
+        case "#ead1dc":
+            row.classList.add("row-purple");
+            break;
+    }
     row.innerHTML = `
       <td>
         <div class="stock-name">${clean(stock.stock)}</div>
