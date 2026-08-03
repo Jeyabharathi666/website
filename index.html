@@ -645,9 +645,9 @@ function openModal(stock){
   document.getElementById("modalTrend").innerHTML = trendSVG(stock.ay, stock.az, stock.ba, stock.z, {w:220, h:60});
   document.getElementById("mCategory").textContent = clean(stock.category);
   document.getElementById("mRating").innerHTML = starsHTML(stock.rating);
-  document.getElementById("mF").textContent = clean(stock.ay) ? "₹" + stock.f : "–";
-  document.getElementById("mH").textContent = clean(stock.az) ? "₹" + stock.h : "–";
-  document.getElementById("mJ").textContent = clean(stock.ba) ? "₹" + stock.j : "–";
+  document.getElementById("mF").textContent = clean(stock.ay) ? "₹" + stock.ay : "–";
+  document.getElementById("mH").textContent = clean(stock.az) ? "₹" + stock.az : "–";
+  document.getElementById("mJ").textContent = clean(stock.ba) ? "₹" + stock.ab : "–";
   document.getElementById("mZ").textContent = clean(stock.z) ? "₹" + stock.z : "–";
   document.getElementById("mAA").textContent = clean(stock.aa) || "–";
   document.getElementById("mAB").textContent = clean(stock.ab) || "–";
